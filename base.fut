@@ -6,8 +6,16 @@ import "lib/github.com/diku-dk/lys/lys"
 module vec2 = mk_vspace_2d f32
 module rng = xorshift128plus
 module dist = uniform_real_distribution f32 rng
+module norm_dist = normal_distribution f32 rng
 
 type point = {pos: vec2.vector, scale: f32, rotate: f32}
+
+-- | Inputs to the `manual` fractal.
+type manual = {
+    rotate0: f32, tfac0: f32, translatex0: f32, translatey0: f32, scale0: f32,
+    rotate1: f32, tfac1: f32, translatex1: f32, translatey1: f32, scale1: f32,
+    rotate2: f32, tfac2: f32, translatex2: f32, translatey2: f32, scale2: f32
+}
 
 let scale (s: f32) (p: point): point =
   p with scale = p.scale * s
