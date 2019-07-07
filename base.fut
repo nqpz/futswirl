@@ -62,10 +62,11 @@ let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
             (height: i32) (width: i32) (steps: i32):
             [height][width]argb.colour =
   let particle_point (i: i32): point =
-    loop p = {pos={x=0, y=0}, scale=1, rotate=0} for step < steps do
-      let factor = n_trans**(steps - step - 1)
-      let base = i % (n_trans * factor)
-      in pick_trans base factor p
+    let (p, _) = loop (p, k) = ({pos={x=0, y=0}, scale=1, rotate=0},
+                                n_trans**steps) for _step < steps do
+                 let k' = k / n_trans
+                 in (pick_trans (i % k) k' p, k')
+    in p
   let array = map particle_point (0..<n_trans**steps)
   let xy_factor = r32 (i32.min height width)
   let y_offset = 0.5 + r32 (i32.max 0 (height - width)) / xy_factor / 2
