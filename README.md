@@ -1,5 +1,8 @@
 # futswirl
 
+futswirl is a small framework for working with
+[IFS](https://en.wikipedia.org/wiki/Iterated_function_system) fractals.
+
 ![Screenshot](swirl.png)
 
 Requires [Futhark](http://futhark-lang.org) and SDL2 and SDL2-ttf
