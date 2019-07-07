@@ -5,7 +5,8 @@ import "lib/github.com/diku-dk/lys/lys"
 
 module vec2 = mk_vspace_2d f32
 module rng = xorshift128plus
-module dist = uniform_int_distribution i32 rng
+module i32dist = uniform_int_distribution i32 rng
+module f32dist = uniform_real_distribution f32 rng
 module norm_dist = normal_distribution f32 rng
 
 type point = {pos: vec2.vector, scale: f32, rotate: f32}
@@ -144,7 +145,7 @@ let gen_manual (rng: rng.rng): (rng.rng, manual) =
   let (rng, translatey3) = gen_f32 rng
   let (rng, scale3) = gen_f32 rng
   let scale3 = scale3 + 0.5
-  let (rng, n_trans) = dist.rand (2, 4) rng
+  let (rng, n_trans) = i32dist.rand (2, 4) rng
   in (rng, {rotate0, tfac0, translatex0, translatey0, scale0,
             rotate1, tfac1, translatex1, translatey1, scale1,
             rotate2, tfac2, translatex2, translatey2, scale2,

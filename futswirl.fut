@@ -1,14 +1,15 @@
 import "base"
 import "fractals_post"
 
-type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
+type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
   type text_content = text_content
 
   type state = {height: i32, width: i32,
                 rng: rng.rng,
                 iterations2: i32, iterations3: i32, iterations4: i32,
-                time: f32, fractal_id: i32, manual: manual}
+                time: f32, fractal_id: i32, manual: manual,
+                auto_mode: bool}
 
   -- | Get the number of transforms per iteration for the current fractal.
   let n_transforms (s: state): i32 =
@@ -38,7 +39,7 @@ module lys: lys with text_content = text_content = {
     in {height=h, width=w,
         rng=rng,
         iterations2=22, iterations3=14, iterations4=11,
-        time=0, fractal_id=0, manual=manual}
+        time=0, fractal_id=0, manual=manual, auto_mode=false}
 
   let resize h w (s: state) =
     s with height = h with width = w
@@ -46,7 +47,16 @@ module lys: lys with text_content = text_content = {
   let event (e: event) (s: state) =
     match e
     case #step td ->
-      s with time = s.time + td
+      let (rng, manual) =
+        if s.auto_mode
+        then let (rng, x) = f32dist.rand (0, 1) s.rng
+             in if x < 0.01
+                then gen_manual rng
+                else (rng, s.manual)
+        else (s.rng, s.manual)
+      in s with time = s.time + td
+           with rng = rng
+           with manual = manual
     case #keydown {key} ->
       if key == SDLK_LEFT
       then s with fractal_id = (s.fractal_id - 1) % fractal_choices
@@ -56,6 +66,8 @@ module lys: lys with text_content = text_content = {
       then set_iterations s (i32.max 0 (get_iterations s - 1))
       else if key == SDLK_UP
       then set_iterations s (get_iterations s + 1)
+      else if key == SDLK_0 || key == SDLK_KP_0
+      then s with auto_mode = !s.auto_mode
       else if key == SDLK_1 || key == SDLK_KP_1
       then let (rng, manual) = gen_manual s.rng
            in s with rng = rng with manual = manual
@@ -85,7 +97,9 @@ module lys: lys with text_content = text_content = {
                     ++ "%[        |Current:] Iterations (2 transforms): %d (max: %d)\n"
                     ++ "%[        |Current:] Iterations (3 transforms): %d (max: %d)\n"
                     ++ "%[        |Current:] Iterations (4 transforms): %d (max: %d)\n"
-                    ++ "Particles: %d^%d = %d\nFPS: %d"
+                    ++ "Particles: %d^%d = %d\n"
+                    ++ "Auto mode: %[disabled|enabled]\n"
+                    ++ "FPS: %d"
 
   let text_content (fps: f32) (s: state): text_content =
     let n_trans = n_transforms s
@@ -96,7 +110,7 @@ module lys: lys with text_content = text_content = {
         i32.bool (n_trans == 2), s.iterations2, max_iterations 2,
         i32.bool (n_trans == 3), s.iterations3, max_iterations 3,
         i32.bool (n_trans == 4), s.iterations4, max_iterations 4,
-        n_trans, iter', n_trans**iter', t32 fps)
+        n_trans, iter', n_trans**iter', i32.bool s.auto_mode, t32 fps)
 
   let text_colour = const argb.white
 }

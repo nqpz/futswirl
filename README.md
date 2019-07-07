@@ -22,6 +22,9 @@ Then run `make run` to build and run in a window.
     `random` is picked).
   - `2`, `3`, `4`: Do the same as `r`, but limit the kind of random
     fractals to 2, 3, or 4 transforms per iteration.
+  - `0`: Toggle auto mode.  When enabled, futswirl will automatically
+    generate new random fractals (when the default `random` is picked)
+    once in a while.
   - Left/right: Change which fractal to show.
   - Down/up: Adjust the number of iterations for the current kind of
     fractal.
