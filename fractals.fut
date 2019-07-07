@@ -1,10 +1,21 @@
 import "base"
 
--- Typical pattern.
-let manual time
-           rotate0 tfac0 translatex0 translatey0 scale0
-           rotate1 tfac1 translatex1 translatey1 scale1
-           rotate2 tfac2 translatex2 translatey2 scale2 =
+-- Typical patterns.
+let manual2 time
+            rotate0 tfac0 translatex0 translatey0 scale0
+            rotate1 tfac1 translatex1 translatey1 scale1 =
+  fractal2
+  (rotate (rotate0 + tfac0 * time)
+   >-> translate (translatex0, translatey0)
+   >-> scale scale0)
+  (rotate (rotate1 + tfac1 * time)
+   >-> translate (translatex1, translatey1)
+   >-> scale scale1)
+
+let manual3 time
+            rotate0 tfac0 translatex0 translatey0 scale0
+            rotate1 tfac1 translatex1 translatey1 scale1
+            rotate2 tfac2 translatex2 translatey2 scale2 =
   fractal3
   (rotate (rotate0 + tfac0 * time)
    >-> translate (translatex0, translatey0)
@@ -15,6 +26,25 @@ let manual time
   (rotate (rotate2 + tfac2 * time)
    >-> translate (translatex2, translatey2)
    >-> scale scale2)
+
+let manual4 time
+            rotate0 tfac0 translatex0 translatey0 scale0
+            rotate1 tfac1 translatex1 translatey1 scale1
+            rotate2 tfac2 translatex2 translatey2 scale2
+            rotate3 tfac3 translatex3 translatey3 scale3 =
+  fractal4
+  (rotate (rotate0 + tfac0 * time)
+   >-> translate (translatex0, translatey0)
+   >-> scale scale0)
+  (rotate (rotate1 + tfac1 * time)
+   >-> translate (translatex1, translatey1)
+   >-> scale scale1)
+  (rotate (rotate2 + tfac2 * time)
+   >-> translate (translatex2, translatey2)
+   >-> scale scale2)
+  (rotate (rotate3 + tfac3 * time)
+   >-> translate (translatex3, translatey3)
+   >-> scale scale3)
 
 let swirl time =
   fractal3
@@ -72,11 +102,23 @@ let render_fractal (f: fractal) (time: f32) (m: manual)
                    (iterations: i32): (i32, [height][width]argb.colour) =
   match f
   case #manual ->
-    manual time
-           m.rotate0 m.tfac0 m.translatex0 m.translatey0 m.scale0
-           m.rotate1 m.tfac1 m.translatex1 m.translatey1 m.scale1
-           m.rotate2 m.tfac2 m.translatex2 m.translatey2 m.scale2
-           height width iterations
+    if m.n_trans == 2
+    then manual2 time
+                 m.rotate0 m.tfac0 m.translatex0 m.translatey0 m.scale0
+                 m.rotate1 m.tfac1 m.translatex1 m.translatey1 m.scale1
+                 height width iterations
+    else if m.n_trans == 3
+    then manual3 time
+                 m.rotate0 m.tfac0 m.translatex0 m.translatey0 m.scale0
+                 m.rotate1 m.tfac1 m.translatex1 m.translatey1 m.scale1
+                 m.rotate2 m.tfac2 m.translatex2 m.translatey2 m.scale2
+                 height width iterations
+    else manual4 time
+                 m.rotate0 m.tfac0 m.translatex0 m.translatey0 m.scale0
+                 m.rotate1 m.tfac1 m.translatex1 m.translatey1 m.scale1
+                 m.rotate2 m.tfac2 m.translatex2 m.translatey2 m.scale2
+                 m.rotate3 m.tfac3 m.translatex3 m.translatey3 m.scale3
+                 height width iterations
   case #swirl ->
     swirl time height width iterations
   case #dissolving_sierpinski ->

@@ -3,53 +3,13 @@ import "fractals"
 
 let fractal_choices = loop i = 0i32 while fractal_from_id i != #eof do i + 1
 
-let fractal_n_transforms (f: fractal): i32 =
-  let m = {rotate0=0, tfac0=0, translatex0=0, translatey0=0, scale0=0,
-           rotate1=0, tfac1=0, translatex1=0, translatey1=0, scale1=0,
-           rotate2=0, tfac2=0, translatex2=0, translatey2=0, scale2=0}
-  in (render_fractal f 0.0 m 0 0 0).1 -- hack!
+let fractal_n_transforms (f: fractal) (m: manual): i32 =
+  (render_fractal f 0.0 m 0 0 0).1 -- hack!
 
 let render_fractal' (f: fractal) (time: f32) (m: manual)
                     (height: i32) (width: i32)
                     (iterations: i32): [height][width]argb.colour =
   (render_fractal f time m height width iterations).2
-
--- We are currently limited by Futhark using 32-bit integers.  We could work
--- around this, but in practice having that many particles is very slow, so we
--- we use this check for now.
-let max_iterations (n_trans: i32): i32 =
-  t32 (f32.log (2**31 - 4096) / f32.log (r32 n_trans))
-
--- | Generate a f32 between -0.5 and +0.5, with most values close to 0.0.
-let gen_f32 (rng: rng.rng): (rng.rng, f32) =
-  let (rng, x) = norm_dist.rand {mean=0, stddev=1} rng
-  in (rng, x / 2)
-
-let gen_manual (rng: rng.rng): (rng.rng, manual) =
-  let (rng, rotate0) = gen_f32 rng
-  let (rng, tfac0) = gen_f32 rng
-  let (rng, translatex0) = gen_f32 rng
-  let (rng, translatey0) = gen_f32 rng
-  let (rng, scale0) = gen_f32 rng
-  let scale0 = scale0 + 0.5
-  let (rng, rotate1) = gen_f32 rng
-  let (rng, tfac1) = gen_f32 rng
-  let (rng, translatex1) = gen_f32 rng
-  let (rng, translatey1) = gen_f32 rng
-  let (rng, scale1) = gen_f32 rng
-  let scale1 = scale1 + 0.5
-  let (rng, rotate2) = gen_f32 rng
-  let (rng, tfac2) = gen_f32 rng
-  let (rng, translatex2) = gen_f32 rng
-  let (rng, translatey2) = gen_f32 rng
-  let (rng, scale2) = gen_f32 rng
-  let scale2 = scale2 + 0.5
-  in (rng, {rotate0=rotate0, tfac0=tfac0, translatex0=translatex0,
-            translatey0=translatey0, scale0=scale0,
-            rotate1=rotate1, tfac1=tfac1, translatex1=translatex1,
-            translatey1=translatey1, scale1=scale1,
-            rotate2=rotate2, tfac2=tfac2, translatex2=translatex2,
-            translatey2=translatey2, scale2=scale2})
 
 type text_content = (i32, i32, i32, i32, i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
@@ -93,7 +53,7 @@ module lys: lys with text_content = text_content = {
     case _ -> s
 
   let render (s: state) =
-    let n_transforms = fractal_n_transforms (fractal_from_id s.fractal_id)
+    let n_transforms = fractal_n_transforms (fractal_from_id s.fractal_id) s.manual
     let max_iter = max_iterations n_transforms
     let iter = i32.min max_iter s.iterations
     in render_fractal' (fractal_from_id s.fractal_id)
@@ -105,7 +65,7 @@ module lys: lys with text_content = text_content = {
                     ++ "]\nTransforms: %d\nIterations: %d (max: %d)\nParticles: %d^%d = %d\nFPS: %d"
 
   let text_content (fps: f32) (s: state): text_content =
-    let n_transforms = fractal_n_transforms (fractal_from_id s.fractal_id)
+    let n_transforms = fractal_n_transforms (fractal_from_id s.fractal_id) s.manual
     let max_iter = max_iterations n_transforms
     let iterations' = i32.min max_iter s.iterations
     in (s.fractal_id, n_transforms, s.iterations, max_iter,
