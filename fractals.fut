@@ -1,50 +1,19 @@
 import "base"
 
 -- Typical patterns.
-let manual2 time
-            rotate0 tfac0 translatex0 translatey0 scale0
-            rotate1 tfac1 translatex1 translatey1 scale1 =
-  fractal2
-  (rotate (rotate0 + tfac0 * time)
-   >-> translate (translatex0, translatey0)
-   >-> scale scale0)
-  (rotate (rotate1 + tfac1 * time)
-   >-> translate (translatex1, translatey1)
-   >-> scale scale1)
+let mt t a b c d e =
+  rotate (a + b * t) >-> translate (c, d) >-> scale e
 
-let manual3 time
-            rotate0 tfac0 translatex0 translatey0 scale0
-            rotate1 tfac1 translatex1 translatey1 scale1
-            rotate2 tfac2 translatex2 translatey2 scale2 =
-  fractal3
-  (rotate (rotate0 + tfac0 * time)
-   >-> translate (translatex0, translatey0)
-   >-> scale scale0)
-  (rotate (rotate1 + tfac1 * time)
-   >-> translate (translatex1, translatey1)
-   >-> scale scale1)
-  (rotate (rotate2 + tfac2 * time)
-   >-> translate (translatex2, translatey2)
-   >-> scale scale2)
+let manual2 t a0 b0 c0 d0 e0 a1 b1 c1 d1 e1 =
+  fractal2 (mt t a0 b0 c0 d0 e0) (mt t a1 b1 c1 d1 e1)
 
-let manual4 time
-            rotate0 tfac0 translatex0 translatey0 scale0
-            rotate1 tfac1 translatex1 translatey1 scale1
-            rotate2 tfac2 translatex2 translatey2 scale2
-            rotate3 tfac3 translatex3 translatey3 scale3 =
-  fractal4
-  (rotate (rotate0 + tfac0 * time)
-   >-> translate (translatex0, translatey0)
-   >-> scale scale0)
-  (rotate (rotate1 + tfac1 * time)
-   >-> translate (translatex1, translatey1)
-   >-> scale scale1)
-  (rotate (rotate2 + tfac2 * time)
-   >-> translate (translatex2, translatey2)
-   >-> scale scale2)
-  (rotate (rotate3 + tfac3 * time)
-   >-> translate (translatex3, translatey3)
-   >-> scale scale3)
+let manual3 t a0 b0 c0 d0 e0 a1 b1 c1 d1 e1 a2 b2 c2 d2 e2 =
+  fractal3 (mt t a0 b0 c0 d0 e0) (mt t a1 b1 c1 d1 e1)
+           (mt t a2 b2 c2 d2 e2)
+
+let manual4 t a0 b0 c0 d0 e0 a1 b1 c1 d1 e1 a2 b2 c2 d2 e2 a3 b3 c3 d3 e3 =
+  fractal4 (mt t a0 b0 c0 d0 e0) (mt t a1 b1 c1 d1 e1)
+           (mt t a2 b2 c2 d2 e2) (mt t a3 b3 c3 d3 e3)
 
 let swirl time =
   fractal3
