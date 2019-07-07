@@ -1,8 +1,7 @@
 import "base"
 
 -- Typical patterns.
-let mt t a b c d e =
-  rotate (a + b * t) >-> translate (c, d) >-> scale e
+let mt t a b c d e = rotate (a + b * t) >-> translate (c, d) >-> scale e
 
 let manual2 t a0 b0 c0 d0 e0 a1 b1 c1 d1 e1 =
   fractal2 (mt t a0 b0 c0 d0 e0) (mt t a1 b1 c1 d1 e1)

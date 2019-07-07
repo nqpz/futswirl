@@ -25,10 +25,8 @@ module lys: lys with text_content = text_content = {
 
   -- | Set the number of iterations for the current fractal.
   let set_iterations (s: state) (iter: i32): state =
-    if n_transforms s == 2
-    then s with iterations2 = iter
-    else if n_transforms s == 3
-    then s with iterations3 = iter
+    if n_transforms s == 2 then s with iterations2 = iter
+    else if n_transforms s == 3 then s with iterations3 = iter
     else s with iterations4 = iter
 
   let grab_mouse = false
@@ -39,7 +37,7 @@ module lys: lys with text_content = text_content = {
     in {height=h, width=w,
         rng=rng,
         iterations2=22, iterations3=14, iterations4=11,
-        time=0, fractal_id=0, manual=manual,
+        time=0.0, fractal_id=0, manual=manual,
         auto_mode=false, cur_start=0.0}
 
   let resize h w (s: state) =
@@ -54,7 +52,7 @@ module lys: lys with text_content = text_content = {
              let (rng, x) = f32dist.rand (0, 20000 / tdiff) s.rng
              in if x < 0.95
                 -- There is 95% chance of generating a new fractal after showing
-                -- the current one in 20 seconds.
+                -- the current one for 20 seconds.
                 then let (rng, manual) = gen_manual rng
                      in (rng, manual, s.time)
                 else (rng, s.manual, s.cur_start)
