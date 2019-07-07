@@ -3,7 +3,7 @@ import "fractals"
 
 let fractal_choices = loop i = 0i32 while fractal_from_id i != #eof do i + 1
 
-type text_content = (i32, i32, i32, f32)
+type text_content = (i32, i32, i32)
 module lys: lys with text_content = text_content = {
   type text_content = text_content
 
@@ -78,10 +78,10 @@ module lys: lys with text_content = text_content = {
   let text_format = "Fractal: %["
                     ++ (loop s = "" for i < fractal_choices do
                           s ++ "|" ++ fractal_name (fractal_from_id i))[1:]
-                    ++ "]\nIterations: %d\nFPS: %d\nTime: %f"
+                    ++ "]\nIterations: %d\nFPS: %d"
 
   let text_content (fps: f32) (s: state): text_content =
-    (s.fractal_id, s.iterations, t32 fps, s.time)
+    (s.fractal_id, s.iterations, t32 fps)
 
   let text_colour = const argb.white
 }
