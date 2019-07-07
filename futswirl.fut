@@ -50,7 +50,7 @@ module lys: lys with text_content = text_content = {
     let (rng, manual) = gen_manual rng
     in {height=h, width=w,
         rng=rng,
-        iterations=12, time=0,
+        iterations=13, time=0,
         fractal_id=0, manual=manual}
 
   let resize h w (s: state) =
