@@ -8,8 +8,17 @@ libraries with associated header files.
 
 ## Building and running
 
-First run `futhark pkg sync` once.
+First run `futhark pkg sync` once (and again upon new pulls).
 
 Then run `make run` to build and run in a window.
 
-No controls yet.  Just the animation.
+
+## Controls
+
+  - Left/right: Change the current fractal.
+  - Down/up: Adjust the number of iterations.
+
+
+## Contributions
+
+Define your fractals in `fractals.fut`.
