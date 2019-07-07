@@ -1,7 +1,7 @@
 import "base"
 import "fractals_post"
 
-type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
+type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
   type text_content = text_content
 
@@ -72,7 +72,7 @@ module lys: lys with text_content = text_content = {
   let text_format = "Fractal: %["
                     ++ (loop s = "" for i < fractal_choices do
                           s ++ "|" ++ fractal_name (fractal_from_id i))[1:]
-                    ++ "]\nTransforms: %d\nIterations (2 transforms): %d (max: %d)\nIterations (3 transforms): %d (max: %d)\nIterations (4 transforms): %d (max: %d)\nParticles: %d^%d = %d\nFPS: %d"
+                    ++ "]\nTransforms: %d\n%[        |Current:] Iterations (2 transforms): %d (max: %d)\n%[        |Current:] Iterations (3 transforms): %d (max: %d)\n%[        |Current:] Iterations (4 transforms): %d (max: %d)\nParticles: %d^%d = %d\nFPS: %d"
 
   let text_content (fps: f32) (s: state): text_content =
     let n_trans = n_transforms s
@@ -80,9 +80,9 @@ module lys: lys with text_content = text_content = {
     let max_iter = max_iterations n_trans
     let iter' = i32.min iter max_iter
     in (s.fractal_id, n_trans,
-        s.iterations2, max_iterations 2,
-        s.iterations3, max_iterations 3,
-        s.iterations4, max_iterations 4,
+        i32.bool (n_trans == 2), s.iterations2, max_iterations 2,
+        i32.bool (n_trans == 3), s.iterations3, max_iterations 3,
+        i32.bool (n_trans == 4), s.iterations4, max_iterations 4,
         n_trans, iter', n_trans**iter', t32 fps)
 
   let text_colour = const argb.white
