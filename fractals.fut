@@ -1,5 +1,21 @@
 import "base"
 
+-- Typical pattern.
+let manual time
+           rotate0 tfac0 translatex0 translatey0 scale0
+           rotate1 tfac1 translatex1 translatey1 scale1
+           rotate2 tfac2 translatex2 translatey2 scale2 =
+  fractal3
+  (rotate (rotate0 + tfac0 * time)
+   >-> translate (translatex0, translatey0)
+   >-> scale scale0)
+  (rotate (rotate1 + tfac1 * time)
+   >-> translate (translatex1, translatey1)
+   >-> scale scale1)
+  (rotate (rotate2 + tfac2 * time)
+   >-> translate (translatex2, translatey2)
+   >-> scale scale2)
+
 let swirl time =
   fractal3
   (rotate (1.505 + time) >-> scale 0.7)
@@ -22,22 +38,6 @@ let plant time =
   (rotate (0 + time / 3) >-> translate (-0.4, -0.4) >-> scale 0.9)
   (rotate (0.1) >-> translate (0.2, 0.2) >-> scale 0.4)
   (rotate (-0.1) >-> translate (0.2, 0.2) >-> scale 0.3)
-
--- Typical pattern.
-let manual time
-           rotate0 tfac0 translatex0 translatey0 scale0
-           rotate1 tfac1 translatex1 translatey1 scale1
-           rotate2 tfac2 translatex2 translatey2 scale2 =
-  fractal3
-  (rotate (rotate0 + tfac0 * time)
-   >-> translate (translatex0, translatey0)
-   >-> scale scale0)
-  (rotate (rotate1 + tfac1 * time)
-   >-> translate (translatex1, translatey1)
-   >-> scale scale1)
-  (rotate (rotate2 + tfac2 * time)
-   >-> translate (translatex2, translatey2)
-   >-> scale scale2)
 
 -- Note: If you add a new fractal, you need to extend both the type and the
 -- three functions.
