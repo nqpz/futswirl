@@ -4,10 +4,10 @@ import "lib/github.com/diku-dk/cpprandom/random"
 import "lib/github.com/diku-dk/lys/lys"
 
 module vec2 = mk_vspace_2d f32
-type point = {pos: vec2.vector, scale: f32, rotate: f32}
-
 module rng = xorshift128plus
 module dist = uniform_real_distribution f32 rng
+
+type point = {pos: vec2.vector, scale: f32, rotate: f32}
 
 let scale (s: f32) (p: point): point =
   p with scale = p.scale * s
