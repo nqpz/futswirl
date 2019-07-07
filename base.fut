@@ -67,7 +67,8 @@ let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
                  let k' = k / n_trans
                  in (pick_trans (i % k) k' p, k')
     in p
-  let array = map particle_point (0..<n_trans**steps)
+  let n_points = n_trans**steps
+  let points = map particle_point (0..<n_points)
   let xy_factor = r32 (i32.min height width)
   let y_offset = 0.5 + r32 (i32.max 0 (height - width)) / xy_factor / 2
   let x_offset = 0.5 + r32 (i32.max 0 (width - height)) / xy_factor / 2
@@ -76,9 +77,9 @@ let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
                   let x = t32 ((p.pos.x + x_offset) * xy_factor)
                   in if x < 0 || x >= width || y < 0 || y >= height
                      then -1
-                     else y * width + x) array
+                     else y * width + x) points
   let frame = replicate (height * width) 0
-  let vs = replicate (length array) 1
+  let vs = replicate n_points 1
   let frame' = reduce_by_index frame (+) 0 is vs
   let max_depth = reduce i32.max 0 frame'
   let frame'' = map (\depth ->
