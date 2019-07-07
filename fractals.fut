@@ -17,12 +17,19 @@ let fireworks_geometry time =
   (rotate (0.5 + time / 5) >-> translate (0, -0.08) >-> scale 0.99)
   (rotate (-0.5 - time / 5) >-> translate (0, 0.08) >-> scale 0.99)
 
+let plant time =
+  fractal3
+  (rotate (0 + time / 3) >-> translate (-0.4, -0.4) >-> scale 0.9)
+  (rotate (0.1) >-> translate (0.2, 0.2) >-> scale 0.4)
+  (rotate (-0.1) >-> translate (0.2, 0.2) >-> scale 0.3)
+
 -- Note: If you add a new fractal, you need to extend both the type and the
 -- three functions.
 
 type fractal = #swirl
              | #dissolving_sierpinski
              | #fireworks_geometry
+             | #plant
              | #eof -- end of fractals
 
 let fractal_from_id (i: i32): fractal =
@@ -30,6 +37,7 @@ let fractal_from_id (i: i32): fractal =
   case 0 -> #swirl
   case 1 -> #dissolving_sierpinski
   case 2 -> #fireworks_geometry
+  case 3 -> #plant
   case _ -> #eof
 
 let fractal_name (f: fractal): string =
@@ -37,6 +45,7 @@ let fractal_name (f: fractal): string =
   case #swirl -> "swirl"
   case #dissolving_sierpinski -> "dissolving sierpinski"
   case #fireworks_geometry -> "fireworks geometry"
+  case #plant -> "plant"
   case #eof -> ""
 
 let render_fractal (f: fractal) (time: f32) (_rand: f32) -- XXX: use rand for fun
@@ -49,4 +58,6 @@ let render_fractal (f: fractal) (time: f32) (_rand: f32) -- XXX: use rand for fu
     dissolving_sierpinski time height width iterations
   case #fireworks_geometry ->
     fireworks_geometry time height width iterations
+  case #plant ->
+    plant time height width iterations
   case #eof -> []
