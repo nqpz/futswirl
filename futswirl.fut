@@ -1,14 +1,34 @@
 import "base"
 import "fractals_post"
 
-type text_content = (i32, i32, i32, i32, i32, i32, i32, i32)
+type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
   type text_content = text_content
 
   type state = {height: i32, width: i32,
                 rng: rng.rng,
-                iterations: i32, time: f32,
-                fractal_id: i32, manual: manual}
+                iterations2: i32, iterations3: i32, iterations4: i32,
+                time: f32, fractal_id: i32, manual: manual}
+
+  -- | Get the number of transforms per iteration for the current fractal.
+  let n_transforms (s: state): i32 =
+    fractal_n_transforms (fractal_from_id s.fractal_id) s.manual
+
+  -- | Get the number of iterations for the current fractal.
+  let get_iterations (s: state): i32 =
+    if n_transforms s == 2
+    then s.iterations2
+    else if n_transforms s == 3
+    then s.iterations3
+    else s.iterations4
+
+  -- | Set the number of iterations for the current fractal.
+  let set_iterations (s: state) (iter: i32): state =
+    if n_transforms s == 2
+    then s with iterations2 = iter
+    else if n_transforms s == 3
+    then s with iterations3 = iter
+    else s with iterations4 = iter
 
   let grab_mouse = false
 
@@ -17,8 +37,8 @@ module lys: lys with text_content = text_content = {
     let (rng, manual) = gen_manual rng
     in {height=h, width=w,
         rng=rng,
-        iterations=13, time=0,
-        fractal_id=0, manual=manual}
+        iterations2=22, iterations3=14, iterations4=11,
+        time=0, fractal_id=0, manual=manual}
 
   let resize h w (s: state) =
     s with height = h with width = w
@@ -33,9 +53,9 @@ module lys: lys with text_content = text_content = {
       else if key == SDLK_RIGHT
       then s with fractal_id = (s.fractal_id + 1) % fractal_choices
       else if key == SDLK_DOWN
-      then s with iterations = i32.max 0 (s.iterations - 1)
+      then set_iterations s (i32.max 0 (get_iterations s - 1))
       else if key == SDLK_UP
-      then s with iterations = s.iterations + 1
+      then set_iterations s (get_iterations s + 1)
       else if key == SDLK_r
       then let (rng, manual) = gen_manual s.rng
            in s with rng = rng with manual = manual
@@ -43,23 +63,27 @@ module lys: lys with text_content = text_content = {
     case _ -> s
 
   let render (s: state) =
-    let n_transforms = fractal_n_transforms (fractal_from_id s.fractal_id) s.manual
-    let max_iter = max_iterations n_transforms
-    let iter = i32.min max_iter s.iterations
+    let iter = get_iterations s
+    let max_iter = max_iterations (n_transforms s)
+    let iter' = i32.min iter max_iter
     in render_fractal' (fractal_from_id s.fractal_id)
-                       s.time s.manual s.height s.width iter
+                       s.time s.manual s.height s.width iter'
 
   let text_format = "Fractal: %["
                     ++ (loop s = "" for i < fractal_choices do
                           s ++ "|" ++ fractal_name (fractal_from_id i))[1:]
-                    ++ "]\nTransforms: %d\nIterations: %d (max: %d)\nParticles: %d^%d = %d\nFPS: %d"
+                    ++ "]\nTransforms: %d\nIterations (2 transforms): %d (max: %d)\nIterations (3 transforms): %d (max: %d)\nIterations (4 transforms): %d (max: %d)\nParticles: %d^%d = %d\nFPS: %d"
 
   let text_content (fps: f32) (s: state): text_content =
-    let n_transforms = fractal_n_transforms (fractal_from_id s.fractal_id) s.manual
-    let max_iter = max_iterations n_transforms
-    let iterations' = i32.min max_iter s.iterations
-    in (s.fractal_id, n_transforms, s.iterations, max_iter,
-        n_transforms, iterations', n_transforms**iterations', t32 fps)
+    let n_trans = n_transforms s
+    let iter = get_iterations s
+    let max_iter = max_iterations n_trans
+    let iter' = i32.min iter max_iter
+    in (s.fractal_id, n_trans,
+        s.iterations2, max_iterations 2,
+        s.iterations3, max_iterations 3,
+        s.iterations4, max_iterations 4,
+        n_trans, iter', n_trans**iter', t32 fps)
 
   let text_colour = const argb.white
 }
