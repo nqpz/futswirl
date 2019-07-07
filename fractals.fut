@@ -60,7 +60,7 @@ let fractal_from_id (i: i32): fractal =
 
 let fractal_name (f: fractal): string =
   match f
-  case #manual -> "manual"
+  case #manual -> "random" -- more meaningful user-facing name than "manual"
   case #swirl -> "swirl"
   case #dissolving_sierpinski -> "dissolving sierpinski"
   case #fireworks_geometry -> "fireworks geometry"
@@ -69,7 +69,7 @@ let fractal_name (f: fractal): string =
 
 let render_fractal (f: fractal) (time: f32) (m: manual)
                    (height: i32) (width: i32)
-                   (iterations: i32): [height][width]argb.colour =
+                   (iterations: i32): (i32, [height][width]argb.colour) =
   match f
   case #manual ->
     manual time
@@ -85,4 +85,4 @@ let render_fractal (f: fractal) (time: f32) (m: manual)
     fireworks_geometry time height width iterations
   case #plant ->
     plant time height width iterations
-  case #eof -> replicate height (replicate width 0)
+  case #eof -> (0, replicate height (replicate width 0))

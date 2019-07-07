@@ -60,7 +60,7 @@ let hsl_to_rgb (h: f32) (s: f32) (l: f32): (f32, f32, f32) =
 
 let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
             (height: i32) (width: i32) (steps: i32):
-            [height][width]argb.colour =
+            (i32, [height][width]argb.colour) =
   let particle_point (i: i32): point =
     let (p, _) = loop (p, k) = ({pos={x=0, y=0}, scale=1, rotate=0},
                                 n_trans**steps) for _step < steps do
@@ -86,7 +86,7 @@ let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
                        let (r, g, b) = hsl_to_rgb
                                        (0.5 + r32 depth / r32 max_depth) 0.5 0.5
                        in i32.sgn depth * argb_colour.from_rgba r g b 1.0) frame'
-  in unflatten height width frame''
+  in (n_trans, unflatten height width frame'')
 
 let fractal2 trans0 trans1 =
   fractal 2 (\base factor p ->

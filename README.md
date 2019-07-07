@@ -19,7 +19,7 @@ Then run `make run` to build and run in a window.
 ## Controls
 
   - `r`: Generate a new random fractal (shown when the default fractal
-    `manual` is picked).
+    `random` is picked).
   - Left/right: Change which fractal to show.
   - Down/up: Adjust the number of iterations.
 
