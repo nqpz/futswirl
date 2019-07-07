@@ -85,4 +85,4 @@ let render_fractal (f: fractal) (time: f32) (m: manual)
     fireworks_geometry time height width iterations
   case #plant ->
     plant time height width iterations
-  case #eof -> []
+  case #eof -> replicate height (replicate width 0)
