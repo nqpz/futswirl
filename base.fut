@@ -104,12 +104,3 @@ let fractal4 trans0 trans1 trans2 trans3 =
                else if factor <= base && base < 2 * factor then trans1 p
                else if 2 * factor <= base && base < 3 * factor then trans2 p
                else trans3 p)
-
--- XXX: Use this for fun along with rand
-let var (start: f32) (end: f32) (source: f32) (source_period: f32): f32 =
-  let diff = end - start
-  let pos_source = source - f32.floor (source / source_period) * source_period
-  let pos_source' = if pos_source >= source_period / 2
-                    then source_period - pos_source
-                    else pos_source
-  in pos_source' * (diff / source_period) - start
