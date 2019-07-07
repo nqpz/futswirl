@@ -9,7 +9,7 @@ module lys: lys with text_content = text_content = {
                 rng: rng.rng,
                 iterations2: i32, iterations3: i32, iterations4: i32,
                 time: f32, fractal_id: i32, manual: manual,
-                auto_mode: bool}
+                auto_mode: bool, cur_start: f32}
 
   -- | Get the number of transforms per iteration for the current fractal.
   let n_transforms (s: state): i32 =
@@ -39,7 +39,8 @@ module lys: lys with text_content = text_content = {
     in {height=h, width=w,
         rng=rng,
         iterations2=22, iterations3=14, iterations4=11,
-        time=0, fractal_id=0, manual=manual, auto_mode=false}
+        time=0, fractal_id=0, manual=manual,
+        auto_mode=false, cur_start=0.0}
 
   let resize h w (s: state) =
     s with height = h with width = w
@@ -47,16 +48,21 @@ module lys: lys with text_content = text_content = {
   let event (e: event) (s: state) =
     match e
     case #step td ->
-      let (rng, manual) =
+      let (rng, manual, cur_start) =
         if s.auto_mode
-        then let (rng, x) = f32dist.rand (0, 1) s.rng
-             in if x < 0.01
-                then gen_manual rng
-                else (rng, s.manual)
-        else (s.rng, s.manual)
+        then let tdiff = s.time - s.cur_start
+             let (rng, x) = f32dist.rand (0, 20000 / tdiff) s.rng
+             in if x < 0.95
+                -- There is 95% chance of generating a new fractal after showing
+                -- the current one in 20 seconds.
+                then let (rng, manual) = gen_manual rng
+                     in (rng, manual, s.time)
+                else (rng, s.manual, s.cur_start)
+        else (s.rng, s.manual, s.cur_start)
       in s with time = s.time + td
            with rng = rng
            with manual = manual
+           with cur_start = cur_start
     case #keydown {key} ->
       if key == SDLK_LEFT
       then s with fractal_id = (s.fractal_id - 1) % fractal_choices
@@ -70,16 +76,19 @@ module lys: lys with text_content = text_content = {
       then s with auto_mode = !s.auto_mode
       else if key == SDLK_1 || key == SDLK_KP_1
       then let (rng, manual) = gen_manual s.rng
-           in s with rng = rng with manual = manual
+           in s with rng = rng with manual = manual with cur_start = s.time
       else if key == SDLK_2 || key == SDLK_KP_2
       then let (rng, manual) = gen_manual s.rng
            in s with rng = rng with manual = (manual with n_trans = 2)
+                               with cur_start = s.time
       else if key == SDLK_3 || key == SDLK_KP_3
       then let (rng, manual) = gen_manual s.rng
            in s with rng = rng with manual = (manual with n_trans = 3)
+                               with cur_start = s.time
       else if key == SDLK_4 || key == SDLK_KP_4
       then let (rng, manual) = gen_manual s.rng
            in s with rng = rng with manual = (manual with n_trans = 4)
+                               with cur_start = s.time
       else s
     case _ -> s
 
