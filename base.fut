@@ -58,18 +58,16 @@ let hsl_to_rgb (h: f32) (s: f32) (l: f32): (f32, f32, f32) =
        let b = hsl_value m1 m2 (h * 6.0 - 2.0)
        in (r, g, b)
 
-let fractal (trans: []point -> i32 -> i32 -> []point)
+let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
             (height: i32) (width: i32) (steps: i32):
             [height][width]argb.colour =
-  let n_trans = 3
-  let array_length = n_trans**steps
-  let array_initial = replicate array_length {pos={x= -1, y= -1},
-                                              scale=0.0f32, rotate=0.0f32}
-  let array_initial[0] = {pos={x=0, y=0}, scale=1, rotate=0}
-  let array =
-    loop array = array_initial for i < steps do
-    let array1 = trans array i (steps - i)
-    in array1
+  let particle_point (i: i32): point =
+    loop p = {pos={x=0, y=0}, scale=1, rotate=0} for step < steps do
+      let stepinv = steps - step
+      let base = i % n_trans**stepinv
+      let factor = n_trans**(stepinv - 1)
+      in pick_trans base factor p
+  let array = map particle_point (0..<n_trans**steps)
   let xy_factor = r32 (i32.min height width)
   let y_offset = 0.5 + r32 (i32.max 0 (height - width)) / xy_factor / 2
   let x_offset = 0.5 + r32 (i32.max 0 (width - height)) / xy_factor / 2
@@ -89,55 +87,23 @@ let fractal (trans: []point -> i32 -> i32 -> []point)
                        in i32.sgn depth * argb_colour.from_rgba r g b 1.0) frame'
   in unflatten height width frame''
 
-let fractal_run_transform (array_dest: *[]point) (array: []point)
-                          (i: i32) (iinv: i32) (n_trans: i32)
-                          (trans: point -> point) (k: i32): *[]point =
-  -- Not necessarily the best way to do it, but could potentially be done
-  -- entirely in-place.
-  let is_dest =
-    map (\j -> j * n_trans**iinv + k * n_trans**(iinv - 1))
-        (0..<n_trans**i)
-  in scatter array_dest is_dest
-             (map (\j -> trans (unsafe array[j - j % n_trans**iinv]))
-                  is_dest)
+let fractal2 trans0 trans1 =
+  fractal 2 (\base factor p ->
+               if base < factor then trans0 p
+               else trans1 p)
 
-let fractal2 (trans0: point -> point) (trans1: point -> point)
-             (height: i32) (width: i32) (steps: i32):
-             [height][width]argb.colour =
-  let n = 2
-  let trans (array: []point) (i: i32) (iinv: i32): []point =
-    let array0 = copy array
-    let array1 = fractal_run_transform array0 array i iinv n trans0 0
-    let array2 = fractal_run_transform array1 array i iinv n trans1 1
-    in array2
-  in fractal trans height width steps
+let fractal3 trans0 trans1 trans2 =
+  fractal 3 (\base factor p ->
+               if base < factor then trans0 p
+               else if factor <= base && base < 2 * factor then trans1 p
+               else trans2 p)
 
-let fractal3 (trans0: point -> point) (trans1: point -> point)
-             (trans2: point -> point)
-             (height: i32) (width: i32) (steps: i32):
-             [height][width]argb.colour =
-  let n = 3
-  let trans (array: []point) (i: i32) (iinv: i32): []point =
-    let array0 = copy array
-    let array1 = fractal_run_transform array0 array i iinv n trans0 0
-    let array2 = fractal_run_transform array1 array i iinv n trans1 1
-    let array3 = fractal_run_transform array2 array i iinv n trans2 2
-    in array3
-  in fractal trans height width steps
-
-let fractal4 (trans0: point -> point) (trans1: point -> point)
-             (trans2: point -> point) (trans3: point -> point)
-             (height: i32) (width: i32) (steps: i32):
-             [height][width]argb.colour =
-  let n = 4
-  let trans (array: []point) (i: i32) (iinv: i32): []point =
-    let array0 = copy array
-    let array1 = fractal_run_transform array0 array i iinv n trans0 0
-    let array2 = fractal_run_transform array1 array i iinv n trans1 1
-    let array3 = fractal_run_transform array2 array i iinv n trans2 2
-    let array4 = fractal_run_transform array3 array i iinv n trans3 3
-    in array4
-  in fractal trans height width steps
+let fractal4 trans0 trans1 trans2 trans3 =
+  fractal 4 (\base factor p ->
+               if base < factor then trans0 p
+               else if factor <= base && base < 2 * factor then trans1 p
+               else if 2 * factor <= base && base < 3 * factor then trans2 p
+               else trans3 p)
 
 -- XXX: Use this for fun along with rand
 let var (start: f32) (end: f32) (source: f32) (source_period: f32): f32 =
