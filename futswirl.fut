@@ -56,7 +56,7 @@ module lys: lys with text_content = text_content = {
       then set_iterations s (i32.max 0 (get_iterations s - 1))
       else if key == SDLK_UP
       then set_iterations s (get_iterations s + 1)
-      else if key == SDLK_r
+      else if key == SDLK_r || key == SDLK_1 || key == SDLK_KP_1
       then let (rng, manual) = gen_manual s.rng
            in s with rng = rng with manual = manual
       else if key == SDLK_2 || key == SDLK_KP_2
