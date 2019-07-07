@@ -81,7 +81,11 @@ module lys: lys with text_content = text_content = {
   let text_format = "Fractal: %["
                     ++ (loop s = "" for i < fractal_choices do
                           s ++ "|" ++ fractal_name (fractal_from_id i))[1:]
-                    ++ "]\nTransforms: %d\n%[        |Current:] Iterations (2 transforms): %d (max: %d)\n%[        |Current:] Iterations (3 transforms): %d (max: %d)\n%[        |Current:] Iterations (4 transforms): %d (max: %d)\nParticles: %d^%d = %d\nFPS: %d"
+                    ++ "]\nTransforms: %d\n"
+                    ++ "%[        |Current:] Iterations (2 transforms): %d (max: %d)\n"
+                    ++ "%[        |Current:] Iterations (3 transforms): %d (max: %d)\n"
+                    ++ "%[        |Current:] Iterations (4 transforms): %d (max: %d)\n"
+                    ++ "Particles: %d^%d = %d\nFPS: %d"
 
   let text_content (fps: f32) (s: state): text_content =
     let n_trans = n_transforms s
