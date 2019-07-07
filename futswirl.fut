@@ -59,6 +59,15 @@ module lys: lys with text_content = text_content = {
       else if key == SDLK_r
       then let (rng, manual) = gen_manual s.rng
            in s with rng = rng with manual = manual
+      else if key == SDLK_2 || key == SDLK_KP_2
+      then let (rng, manual) = gen_manual s.rng
+           in s with rng = rng with manual = (manual with n_trans = 2)
+      else if key == SDLK_3 || key == SDLK_KP_3
+      then let (rng, manual) = gen_manual s.rng
+           in s with rng = rng with manual = (manual with n_trans = 3)
+      else if key == SDLK_4 || key == SDLK_KP_4
+      then let (rng, manual) = gen_manual s.rng
+           in s with rng = rng with manual = (manual with n_trans = 4)
       else s
     case _ -> s
 

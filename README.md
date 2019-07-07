@@ -20,6 +20,8 @@ Then run `make run` to build and run in a window.
 
   - `r`: Generate a new random fractal (shown when the default fractal
     `random` is picked).
+  - `2`, `3`, `4`: Do the same as `r`, but limit the kind of random
+    fractals to 2, 3, or 4 transforms per iteration.
   - Left/right: Change which fractal to show.
   - Down/up: Adjust the number of iterations for the current kind of
     fractal.
