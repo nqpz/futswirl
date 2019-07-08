@@ -25,7 +25,7 @@ Then run `make run` to build and run in a window.
   - `0`: Toggle auto mode.  When enabled, futswirl will automatically
     generate new random fractals (when the default `random` is picked)
     once in a while.
-  - `Ctrl`: Toggle between 2D fractals and 3D fractals.
+  - Enter: Toggle between 2D fractals and 3D fractals.
   - Down/up: Adjust the number of iterations for the current kind of
     fractal.
   - Left/right: Change which fractal to show.

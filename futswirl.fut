@@ -91,7 +91,7 @@ module lys: lys with text_content = text_content = {
         then set_iterations s (i32.max 0 (get_iterations s - 1))
         else if key == SDLK_UP
         then set_iterations s (get_iterations s + 1)
-        else if key == SDLK_LCTRL || key == SDLK_RCTRL
+        else if key == SDLK_RETURN || key == SDLK_KP_ENTER
         then s with dim = match s.dim
                           case #dim2 -> #dim3
                           case #dim3 -> #dim2
