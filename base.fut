@@ -120,30 +120,18 @@ module fractal_utils_2d = fractal_utils_extended {
   }
 
   let gen_manual (rng: rng.rng) (c: gen_manual_constraint): (rng.rng, manual) =
-    let (rng, rotate0) = gen_f32 rng
-    let (rng, tfac0) = gen_f32 rng
-    let (rng, translatex0) = gen_f32 rng
-    let (rng, translatey0) = gen_f32 rng
-    let (rng, scale0) = gen_f32 rng
-    let scale0 = scale0 + 0.5
-    let (rng, rotate1) = gen_f32 rng
-    let (rng, tfac1) = gen_f32 rng
-    let (rng, translatex1) = gen_f32 rng
-    let (rng, translatey1) = gen_f32 rng
-    let (rng, scale1) = gen_f32 rng
-    let scale1 = scale1 + 0.5
-    let (rng, rotate2) = gen_f32 rng
-    let (rng, tfac2) = gen_f32 rng
-    let (rng, translatex2) = gen_f32 rng
-    let (rng, translatey2) = gen_f32 rng
-    let (rng, scale2) = gen_f32 rng
-    let scale2 = scale2 + 0.5
-    let (rng, rotate3) = gen_f32 rng
-    let (rng, tfac3) = gen_f32 rng
-    let (rng, translatex3) = gen_f32 rng
-    let (rng, translatey3) = gen_f32 rng
-    let (rng, scale3) = gen_f32 rng
-    let scale3 = scale3 + 0.5
+    let gen_one rng =
+      let (rng, rotate) = gen_f32 rng
+      let (rng, tfac) = gen_f32 rng
+      let (rng, translatex) = gen_f32 rng
+      let (rng, translatey) = gen_f32 rng
+      let (rng, scale) = gen_f32 rng
+      let scale = scale + 0.5
+      in (rng, rotate, tfac, translatex, translatey, scale)
+    let (rng, rotate0, tfac0, translatex0, translatey0, scale0) = gen_one rng
+    let (rng, rotate1, tfac1, translatex1, translatey1, scale1) = gen_one rng
+    let (rng, rotate2, tfac2, translatex2, translatey2, scale2) = gen_one rng
+    let (rng, rotate3, tfac3, translatex3, translatey3, scale3) = gen_one rng
     let (rng, n_trans) = match c
                          case #none -> i32dist.rand (2, 4) rng
                          case #trans n -> (rng, n)
@@ -190,50 +178,37 @@ module fractal_utils_3d = fractal_utils_extended {
   }
 
   let gen_manual (rng: rng.rng) (c: gen_manual_constraint): (rng.rng, manual) =
-    let (rng, rotatex0) = gen_f32 rng
-    let (rng, rotatey0) = gen_f32 rng
-    let (rng, rotatez0) = gen_f32 rng
-    let (rng, tfacx0) = gen_f32 rng
-    let (rng, tfacy0) = gen_f32 rng
-    let (rng, tfacz0) = gen_f32 rng
-    let (rng, translatex0) = gen_f32 rng
-    let (rng, translatey0) = gen_f32 rng
-    let (rng, translatez0) = gen_f32 rng
-    let (rng, scale0) = gen_f32 rng
-    let scale0 = scale0 + 0.5
-    let (rng, rotatex1) = gen_f32 rng
-    let (rng, rotatey1) = gen_f32 rng
-    let (rng, rotatez1) = gen_f32 rng
-    let (rng, tfacx1) = gen_f32 rng
-    let (rng, tfacy1) = gen_f32 rng
-    let (rng, tfacz1) = gen_f32 rng
-    let (rng, translatex1) = gen_f32 rng
-    let (rng, translatey1) = gen_f32 rng
-    let (rng, translatez1) = gen_f32 rng
-    let (rng, scale1) = gen_f32 rng
-    let scale1 = scale1 + 0.5
-    let (rng, rotatex2) = gen_f32 rng
-    let (rng, rotatey2) = gen_f32 rng
-    let (rng, rotatez2) = gen_f32 rng
-    let (rng, tfacx2) = gen_f32 rng
-    let (rng, tfacy2) = gen_f32 rng
-    let (rng, tfacz2) = gen_f32 rng
-    let (rng, translatex2) = gen_f32 rng
-    let (rng, translatey2) = gen_f32 rng
-    let (rng, translatez2) = gen_f32 rng
-    let (rng, scale2) = gen_f32 rng
-    let scale2 = scale2 + 0.5
-    let (rng, rotatex3) = gen_f32 rng
-    let (rng, rotatey3) = gen_f32 rng
-    let (rng, rotatez3) = gen_f32 rng
-    let (rng, tfacx3) = gen_f32 rng
-    let (rng, tfacy3) = gen_f32 rng
-    let (rng, tfacz3) = gen_f32 rng
-    let (rng, translatex3) = gen_f32 rng
-    let (rng, translatey3) = gen_f32 rng
-    let (rng, translatez3) = gen_f32 rng
-    let (rng, scale3) = gen_f32 rng
-    let scale3 = scale3 + 0.5
+    let gen_one rng =
+      let (rng, rotatex) = gen_f32 rng
+      let (rng, rotatey) = gen_f32 rng
+      let (rng, rotatez) = gen_f32 rng
+      let (rng, tfacx) = gen_f32 rng
+      let (rng, tfacy) = gen_f32 rng
+      let (rng, tfacz) = gen_f32 rng
+      let (rng, translatex) = gen_f32 rng
+      let (rng, translatey) = gen_f32 rng
+      let (rng, translatez) = gen_f32 rng
+      let (rng, scale) = gen_f32 rng
+      let scale = scale + 0.5
+      in (rng, rotatex, rotatey, rotatez,
+          tfacx, tfacy, tfacz,
+          translatex, translatey, translatez, scale)
+    let (rng, rotatex0, rotatey0, rotatez0,
+         tfacx0, tfacy0, tfacz0,
+         translatex0, translatey0, translatez0,
+         scale0) = gen_one rng
+    let (rng, rotatex1, rotatey1, rotatez1,
+         tfacx1, tfacy1, tfacz1,
+         translatex1, translatey1, translatez1,
+         scale1) = gen_one rng
+    let (rng, rotatex2, rotatey2, rotatez2,
+         tfacx2, tfacy2, tfacz2,
+         translatex2, translatey2, translatez2,
+         scale2) = gen_one rng
+    let (rng, rotatex3, rotatey3, rotatez3,
+         tfacx3, tfacy3, tfacz3,
+         translatex3, translatey3, translatez3,
+         scale3) = gen_one rng
     let (rng, n_trans) = match c
                          case #none -> i32dist.rand (2, 4) rng
                          case #trans n -> (rng, n)
