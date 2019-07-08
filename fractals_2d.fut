@@ -1,18 +1,20 @@
 import "base"
+open fractal_utils_2d
 
 -- Typical patterns.
-let mt t a b c d e = rotate (a + b * t) >-> translate (c, d) >-> scale e
+let mt (t: f32) (a: f32) (b: f32) (c: (f32, f32)) (d: f32): point -> point =
+  rotate (a + b * t) >-> translate c >-> scale d
 
-let manual2 t a0 b0 c0 d0 e0 a1 b1 c1 d1 e1 =
-  fractal2 (mt t a0 b0 c0 d0 e0) (mt t a1 b1 c1 d1 e1)
+let manual2 t a0 b0 c0 d0 a1 b1 c1 d1 =
+  fractal2 (mt t a0 b0 c0 d0) (mt t a1 b1 c1 d1)
 
-let manual3 t a0 b0 c0 d0 e0 a1 b1 c1 d1 e1 a2 b2 c2 d2 e2 =
-  fractal3 (mt t a0 b0 c0 d0 e0) (mt t a1 b1 c1 d1 e1)
-           (mt t a2 b2 c2 d2 e2)
+let manual3 t a0 b0 c0 d0 a1 b1 c1 d1 a2 b2 c2 d2 =
+  fractal3 (mt t a0 b0 c0 d0) (mt t a1 b1 c1 d1)
+           (mt t a2 b2 c2 d2)
 
-let manual4 t a0 b0 c0 d0 e0 a1 b1 c1 d1 e1 a2 b2 c2 d2 e2 a3 b3 c3 d3 e3 =
-  fractal4 (mt t a0 b0 c0 d0 e0) (mt t a1 b1 c1 d1 e1)
-           (mt t a2 b2 c2 d2 e2) (mt t a3 b3 c3 d3 e3)
+let manual4 t a0 b0 c0 d0 a1 b1 c1 d1 a2 b2 c2 d2 a3 b3 c3 d3 =
+  fractal4 (mt t a0 b0 c0 d0) (mt t a1 b1 c1 d1)
+           (mt t a2 b2 c2 d2) (mt t a3 b3 c3 d3)
 
 let swirl time =
   fractal3
@@ -46,6 +48,7 @@ type fractal = #manual
              | #fireworks_geometry
              | #plant
              | #eof -- end of fractals
+let fractals_end (f: fractal): bool = f == #eof
 
 let fractal_from_id (i: i32): fractal =
   match i
@@ -70,23 +73,25 @@ let render_fractal (f: fractal) (time: f32) (m: manual)
                    (iterations: i32): (i32, [height][width]argb.colour) =
   match f
   case #manual ->
-    if m.n_trans == 2
-    then manual2 time
-                 m.rotate0 m.tfac0 m.translatex0 m.translatey0 m.scale0
-                 m.rotate1 m.tfac1 m.translatex1 m.translatey1 m.scale1
-                 height width iterations
-    else if m.n_trans == 3
-    then manual3 time
-                 m.rotate0 m.tfac0 m.translatex0 m.translatey0 m.scale0
-                 m.rotate1 m.tfac1 m.translatex1 m.translatey1 m.scale1
-                 m.rotate2 m.tfac2 m.translatex2 m.translatey2 m.scale2
-                 height width iterations
-    else manual4 time
-                 m.rotate0 m.tfac0 m.translatex0 m.translatey0 m.scale0
-                 m.rotate1 m.tfac1 m.translatex1 m.translatey1 m.scale1
-                 m.rotate2 m.tfac2 m.translatex2 m.translatey2 m.scale2
-                 m.rotate3 m.tfac3 m.translatex3 m.translatey3 m.scale3
-                 height width iterations
+    (match m.n_trans
+     case #trans2 ->
+       manual2 time
+               m.rotate0 m.tfac0 m.translate0 m.scale0
+               m.rotate1 m.tfac1 m.translate1 m.scale1
+               height width iterations
+     case #trans3 ->
+       manual3 time
+               m.rotate0 m.tfac0 m.translate0 m.scale0
+               m.rotate1 m.tfac1 m.translate1 m.scale1
+               m.rotate2 m.tfac2 m.translate2 m.scale2
+               height width iterations
+     case #trans4 ->
+       manual4 time
+               m.rotate0 m.tfac0 m.translate0 m.scale0
+               m.rotate1 m.tfac1 m.translate1 m.scale1
+               m.rotate2 m.tfac2 m.translate2 m.scale2
+               m.rotate3 m.tfac3 m.translate3 m.scale3
+               height width iterations)
   case #swirl ->
     swirl time height width iterations
   case #dissolving_sierpinski ->
