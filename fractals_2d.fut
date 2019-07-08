@@ -20,7 +20,7 @@ let swirl time =
   fractal3
   (rotate (1.505 + time) >-> scale 0.7)
   (rotate (-0.4) >-> translate (0.1, 0.1) >-> scale 0.95)
-  (scale (0.8) >-> translate_x 0.1)
+  (scale (0.8) >-> translate (0.1, 0))
 
 let dissolving_sierpinski time =
   fractal3

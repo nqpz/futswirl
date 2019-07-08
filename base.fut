@@ -41,7 +41,73 @@ let gen_f32 (rng: rng.rng): (rng.rng, f32) =
 
 type gen_manual_constraint = #none | #trans i32
 
-module fractal_utils_2d = {
+module type fractal_utils = {
+  type manual
+  val gen_manual: rng.rng -> gen_manual_constraint -> (rng.rng, manual)
+  type point
+  val scale: f32 -> point -> point
+  type rotate_t
+  val rotate: rotate_t -> point -> point
+  type translate_t
+  val translate: translate_t -> point -> point
+  val start_point: point
+  val xypos: point -> (f32, f32)
+}
+
+module fractal_utils_extended (u: fractal_utils) = {
+  open u
+
+  let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
+              (height: i32) (width: i32) (steps: i32):
+              (i32, [height][width]argb.colour) =
+    let particle_point (i: i32): point =
+      let (p, _) = loop (p, k) = (start_point,
+                                  n_trans**steps) for _step < steps do
+                   let k' = k / n_trans
+                   in (pick_trans (i % k) k' p, k')
+      in p
+    let n_points = n_trans**steps
+    let points = map particle_point (0..<n_points)
+    let xy_factor = r32 (i32.min height width)
+    let y_offset = 0.5 + r32 (i32.max 0 (height - width)) / xy_factor / 2
+    let x_offset = 0.5 + r32 (i32.max 0 (width - height)) / xy_factor / 2
+    let is = map (\p ->
+                    let (x0, y0) = xypos p
+                    let y = t32 ((y0 + y_offset) * xy_factor)
+                    let x = t32 ((x0 + x_offset) * xy_factor)
+                    in if x < 0 || x >= width || y < 0 || y >= height
+                       then -1
+                       else y * width + x) points
+    let frame = replicate (height * width) 0
+    let vs = replicate n_points 1
+    let frame' = reduce_by_index frame (+) 0 is vs
+    let max_depth = reduce i32.max 0 frame'
+    let frame'' = map (\depth ->
+                         let (r, g, b) = hsl_to_rgb
+                                         (0.5 + r32 depth / r32 max_depth) 0.5 0.5
+                         in i32.sgn depth * argb_colour.from_rgba r g b 1.0) frame'
+    in (n_trans, unflatten height width frame'')
+
+  let fractal2 trans0 trans1 =
+    fractal 2 (\base factor p ->
+                 if base < factor then trans0 p
+                 else trans1 p)
+
+  let fractal3 trans0 trans1 trans2 =
+    fractal 3 (\base factor p ->
+                 if base < factor then trans0 p
+                 else if factor <= base && base < 2 * factor then trans1 p
+                 else trans2 p)
+
+  let fractal4 trans0 trans1 trans2 trans3 =
+    fractal 4 (\base factor p ->
+                 if base < factor then trans0 p
+                 else if factor <= base && base < 2 * factor then trans1 p
+                 else if 2 * factor <= base && base < 3 * factor then trans2 p
+                 else trans3 p)
+}
+
+module fractal_utils_2d = fractal_utils_extended {
   module vec2 = mk_vspace_2d f32
 
   -- | Inputs to the 2D `manual` fractal.
@@ -96,68 +162,22 @@ module fractal_utils_2d = {
   let scale (s: f32) (p: point): point =
     p with scale = p.scale * s
 
-  let rotate (rotd: f32) (p: point): point =
+  type rotate_t = f32
+  let rotate (rotd: rotate_t) (p: point): point =
     p with rotate = p.rotate + rotd
 
-  let translate' (posd: vec2.vector) (p: point): point =
+  type translate_t = (f32, f32)
+  let translate ((xd, yd): translate_t) (p: point): point =
     let rot {x, y} = {x=x * f32.cos p.rotate - y * f32.sin p.rotate,
                       y=y * f32.cos p.rotate + x * f32.sin p.rotate}
-    in p with pos = vec2.(p.pos + rot (scale p.scale posd))
+    in p with pos = vec2.(p.pos + rot (scale p.scale {x=xd, y=yd}))
 
-  let translate (xd: f32, yd: f32) = translate' {x=xd, y=yd}
-  let translate_x (xd: f32) = translate (xd, 0)
-  let translate_y (yd: f32) = translate (0, yd)
+  let start_point: point = {pos={x=0, y=0}, scale=1, rotate=0}
 
-  let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
-              (height: i32) (width: i32) (steps: i32):
-              (i32, [height][width]argb.colour) =
-    let particle_point (i: i32): point =
-      let (p, _) = loop (p, k) = ({pos={x=0, y=0}, scale=1, rotate=0},
-                                  n_trans**steps) for _step < steps do
-                   let k' = k / n_trans
-                   in (pick_trans (i % k) k' p, k')
-      in p
-    let n_points = n_trans**steps
-    let points = map particle_point (0..<n_points)
-    let xy_factor = r32 (i32.min height width)
-    let y_offset = 0.5 + r32 (i32.max 0 (height - width)) / xy_factor / 2
-    let x_offset = 0.5 + r32 (i32.max 0 (width - height)) / xy_factor / 2
-    let is = map (\p ->
-                    let y = t32 ((p.pos.y + y_offset) * xy_factor)
-                    let x = t32 ((p.pos.x + x_offset) * xy_factor)
-                    in if x < 0 || x >= width || y < 0 || y >= height
-                       then -1
-                       else y * width + x) points
-    let frame = replicate (height * width) 0
-    let vs = replicate n_points 1
-    let frame' = reduce_by_index frame (+) 0 is vs
-    let max_depth = reduce i32.max 0 frame'
-    let frame'' = map (\depth ->
-                         let (r, g, b) = hsl_to_rgb
-                                         (0.5 + r32 depth / r32 max_depth) 0.5 0.5
-                         in i32.sgn depth * argb_colour.from_rgba r g b 1.0) frame'
-    in (n_trans, unflatten height width frame'')
-
-  let fractal2 trans0 trans1 =
-    fractal 2 (\base factor p ->
-                 if base < factor then trans0 p
-                 else trans1 p)
-
-  let fractal3 trans0 trans1 trans2 =
-    fractal 3 (\base factor p ->
-                 if base < factor then trans0 p
-                 else if factor <= base && base < 2 * factor then trans1 p
-                 else trans2 p)
-
-  let fractal4 trans0 trans1 trans2 trans3 =
-    fractal 4 (\base factor p ->
-                 if base < factor then trans0 p
-                 else if factor <= base && base < 2 * factor then trans1 p
-                 else if 2 * factor <= base && base < 3 * factor then trans2 p
-                 else trans3 p)
+  let xypos (p: point): (f32, f32) = (p.pos.x, p.pos.y)
 }
 
-module fractal_utils_3d = {
+module fractal_utils_3d = fractal_utils_extended {
   module vec3 = mk_vspace_3d f32
 
   -- | Inputs to the 3D `manual` fractal.
@@ -240,15 +260,12 @@ module fractal_utils_3d = {
   let scale (s: f32) (p: point): point =
     p with scale = p.scale * s
 
-  let rotate' (rotd: vec3.vector) (p: point): point =
-    p with rotate = p.rotate vec3.+ rotd
+  type rotate_t = (f32, f32, f32)
+  let rotate ((xd, yd, zd): rotate_t) (p: point): point =
+    p with rotate = p.rotate vec3.+ {x=xd, y=yd, z=zd}
 
-  let rotate (xd: f32, yd: f32, zd: f32) = rotate' {x=xd, y=yd, z=zd}
-  let rotate_x (xd: f32) = rotate (xd, 0, 0)
-  let rotate_y (yd: f32) = rotate (0, yd, 0)
-  let rotate_z (zd: f32) = rotate (0, 0, zd)
-
-  let translate' (posd: vec3.vector) (p: point): point =
+  type translate_t = (f32, f32, f32)
+  let translate ((xd, yd, zd): translate_t) (p: point): point =
     let {x=ax, y=ay, z=az} = p.rotate
     let rot {x=x0, y=y0, z=z0} =
       let (sin_x, cos_x) = (f32.sin ax, f32.cos ax)
@@ -269,70 +286,19 @@ module fractal_utils_3d = {
                           z2)
 
       in {x=x3, y=y3, z=z3}
-    in p with pos = vec3.(p.pos + rot (scale p.scale posd))
+    in p with pos = vec3.(p.pos + rot (scale p.scale {x=xd, y=yd, z=zd}))
 
-  let translate (xd: f32, yd: f32, zd: f32) = translate' {x=xd, y=yd, z=zd}
-  let translate_x (xd: f32) = translate (xd, 0, 0)
-  let translate_y (yd: f32) = translate (0, yd, 0)
-  let translate_z (zd: f32) = translate (0, 0, zd)
+  let start_point: point = {pos={x=0, y=0, z=0.5}, scale=1,
+                            rotate={x=0, y=0, z=0}}
 
-  let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
-              (height: i32) (width: i32) (steps: i32):
-              (i32, [height][width]argb.colour) =
-    let particle_point (i: i32): point =
-      let (p, _) = loop (p, k) = ({pos={x=0, y=0, z=0.5}, scale=1, rotate={x=0, y=0, z=0}},
-                                  n_trans**steps) for _step < steps do
-                   let k' = k / n_trans
-                   in (pick_trans (i % k) k' p, k')
-      in p
-    let n_points = n_trans**steps
-    let points = map particle_point (0..<n_points)
-    let xy_factor = r32 (i32.min height width)
-    let y_offset = 0.5 + r32 (i32.max 0 (height - width)) / xy_factor / 2
-    let x_offset = 0.5 + r32 (i32.max 0 (width - height)) / xy_factor / 2
-
-    let project_point {x, y, z} =
-      let z_ratio = if z >= 0
-                    then (1 + z) / 1
-                    else 1 / ((1 - z) / 1)
-      let x_projected = x / z_ratio
-      let y_projected = y / z_ratio
-      in {x=x_projected, y=y_projected}
-
-    let is = map (\p ->
-                    let pos = project_point p.pos
-                    let y = t32 ((pos.y + y_offset) * xy_factor)
-                    let x = t32 ((pos.x + x_offset) * xy_factor)
-                    in if x < 0 || x >= width || y < 0 || y >= height
-                       then -1
-                       else y * width + x) points
-    let frame = replicate (height * width) 0
-    let vs = replicate n_points 1
-    let frame' = reduce_by_index frame (+) 0 is vs
-    let max_depth = reduce i32.max 0 frame'
-    let frame'' = map (\depth ->
-                         let (r, g, b) = hsl_to_rgb
-                                         (0.5 + r32 depth / r32 max_depth) 0.5 0.5
-                         in i32.sgn depth * argb_colour.from_rgba r g b 1.0) frame'
-    in (n_trans, unflatten height width frame'')
-
-  let fractal2 trans0 trans1 =
-    fractal 2 (\base factor p ->
-                 if base < factor then trans0 p
-                 else trans1 p)
-
-  let fractal3 trans0 trans1 trans2 =
-    fractal 3 (\base factor p ->
-                 if base < factor then trans0 p
-                 else if factor <= base && base < 2 * factor then trans1 p
-                 else trans2 p)
-
-  let fractal4 trans0 trans1 trans2 trans3 =
-    fractal 4 (\base factor p ->
-                 if base < factor then trans0 p
-                 else if factor <= base && base < 2 * factor then trans1 p
-                 else if 2 * factor <= base && base < 3 * factor then trans2 p
-                 else trans3 p)
+  let xypos (p: point): (f32, f32) =
+    let {x, y, z} = p.pos
+    let z_ratio = if z >= 0
+                  then (1 + z) / 1
+                  else 1 / ((1 - z) / 1)
+    let x_projected = x / z_ratio
+    let y_projected = y / z_ratio
+    in (x_projected, y_projected)
 }
 
 module type fractals_base = {
