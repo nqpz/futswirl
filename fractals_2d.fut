@@ -39,6 +39,12 @@ let plant time =
   (rotate (0.1) >-> translate (0.2, 0.2) >-> scale 0.4)
   (rotate (-0.1) >-> translate (0.2, 0.2) >-> scale 0.3)
 
+let trigonometry time =
+  fractal3
+  (rotate (f32.cos time) >-> scale 0.9)
+  (rotate (f32.sin time) >-> scale 0.9)
+  (translate (f32.sin time / 2, f32.cos time / 2) >-> scale 0.5)
+
 -- Note: If you add a new fractal, you need to extend both the type and the
 -- three functions.
 
@@ -47,6 +53,7 @@ type fractal = #manual
              | #dissolving_sierpinski
              | #fireworks_geometry
              | #plant
+             | #trigonometry
              | #eof -- end of fractals
 let fractals_end (f: fractal): bool = f == #eof
 
@@ -57,6 +64,7 @@ let fractal_from_id (i: i32): fractal =
   case 2 -> #dissolving_sierpinski
   case 3 -> #fireworks_geometry
   case 4 -> #plant
+  case 5 -> #trigonometry
   case _ -> #eof
 
 let fractal_name (f: fractal): string =
@@ -66,6 +74,7 @@ let fractal_name (f: fractal): string =
   case #dissolving_sierpinski -> "dissolving sierpinski"
   case #fireworks_geometry -> "fireworks geometry"
   case #plant -> "plant"
+  case #trigonometry -> "trigonometry"
   case #eof -> ""
 
 let render_fractal (f: fractal) (time: f32) (m: manual)
@@ -102,4 +111,6 @@ let render_fractal (f: fractal) (time: f32) (m: manual)
     fireworks_geometry time height width iterations vp_zoom vp_center
   case #plant ->
     plant time height width iterations vp_zoom vp_center
+  case #trigonometry ->
+    trigonometry time height width iterations vp_zoom vp_center
   case #eof -> (0, replicate height (replicate width 0))
