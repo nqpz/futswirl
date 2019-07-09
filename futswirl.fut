@@ -60,10 +60,10 @@ module lys: lys with text_content = text_content = {
         let (rng, manual, cur_start) =
           if (f.dim_info s).auto_mode
           then let tdiff = s.time - (f.dim_info s).cur_start
-               let (rng, x) = f32dist.rand (0, 20000 / tdiff) s.rng
+               let (rng, x) = f32dist.rand (0, 10000 / tdiff) s.rng
                in if x < 0.95
                   -- There is 95% chance of generating a new fractal after showing
-                  -- the current one for 20 seconds.
+                  -- the current one for 10 seconds.
                   then let (rng, manual) = f.gen_manual rng #none
                        in (rng, manual, s.time)
                   else (rng, (f.dim_info s).manual, (f.dim_info s).cur_start)
