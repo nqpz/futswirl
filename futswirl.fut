@@ -3,8 +3,8 @@ import "base"
 module f2d = fractals (import "fractals_2d")
 module f3d = fractals (import "fractals_3d")
 
-type text_content = (i32, i32, i32, i32, i32, i32, i32, i32,
-                     i32, i32, i32, i32, i32, i32, i32, i32, i32)
+type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i32,
+                     i32, i32, i32, i32, i32, f32, f32, f32, i32, i32)
 module lys: lys with text_content = text_content = {
   type text_content = text_content
 
@@ -13,7 +13,8 @@ module lys: lys with text_content = text_content = {
 
   type state = {height: i32, width: i32, rng: rng.rng,
                 iterations2: i32, iterations3: i32, iterations4: i32,
-                time: f32, dim: #dim2 | #dim3,
+                time: f32, vp_zoom: f32, vp_center: vec2.vector,
+                shift_key: bool, dim: #dim2 | #dim3,
                 dim2_info: dim_info f2d.manual,
                 dim3_info: dim_info f3d.manual}
 
@@ -74,7 +75,21 @@ module lys: lys with text_content = text_content = {
                          with manual = manual
                          with cur_start = cur_start)
       case #keydown {key} ->
-        if key == SDLK_LEFT
+        if key == SDLK_LSHIFT || key == SDLK_RSHIFT
+        then s with shift_key = true
+        else if key == SDLK_PAGEUP
+        then s with vp_zoom = s.vp_zoom + 0.1
+        else if key == SDLK_PAGEDOWN
+        then s with vp_zoom = f32.max 0.1 (s.vp_zoom - 0.1)
+        else if key == SDLK_LEFT && s.shift_key
+        then s with vp_center.x = s.vp_center.x - 0.01 / (f32.sqrt s.vp_zoom)
+        else if key == SDLK_RIGHT && s.shift_key
+        then s with vp_center.x = s.vp_center.x + 0.01 / (f32.sqrt s.vp_zoom)
+        else if key == SDLK_UP && s.shift_key
+        then s with vp_center.y = s.vp_center.y - 0.01 / (f32.sqrt s.vp_zoom)
+        else if key == SDLK_DOWN && s.shift_key
+        then s with vp_center.y = s.vp_center.y + 0.01 / (f32.sqrt s.vp_zoom)
+        else if key == SDLK_LEFT
         then set_fractal_id s (fractal_id s - 1)
         else if key == SDLK_RIGHT
         then set_fractal_id s (fractal_id s + 1)
@@ -104,6 +119,10 @@ module lys: lys with text_content = text_content = {
                                        (f.dim_info s with manual = manual
                                                      with cur_start = s.time)
                 else s
+      case #keyup {key} ->
+        if key == SDLK_LSHIFT || key == SDLK_RSHIFT
+        then s with shift_key = false
+        else s
       case _ -> s
 
     let render (s: state) =
@@ -111,7 +130,9 @@ module lys: lys with text_content = text_content = {
       let max_iter = max_iterations (n_transforms s)
       let iter' = i32.min iter max_iter
       in f.render_fractal (f.fractal_from_id (fractal_id s))
-                          s.time (f.dim_info s).manual s.height s.width iter'
+                          s.time (f.dim_info s).manual
+                          s.height s.width iter'
+                          s.vp_zoom s.vp_center
 
     let text_content (fps: f32) (s: state): text_content =
       let n_trans = n_transforms s
@@ -122,8 +143,9 @@ module lys: lys with text_content = text_content = {
           i32.bool (n_trans == 2), s.iterations2, max_iterations 2,
           i32.bool (n_trans == 3), s.iterations3, max_iterations 3,
           i32.bool (n_trans == 4), s.iterations4, max_iterations 4,
-          n_trans, iter', n_trans**iter', i32.bool (f.dim_info s).auto_mode,
-          t32 fps)
+          n_trans, iter', n_trans**iter',
+          s.vp_center.x, s.vp_center.y, s.vp_zoom,
+          i32.bool (f.dim_info s).auto_mode, t32 fps)
   }
 
   module f2de = fractals_extended {
@@ -153,7 +175,8 @@ module lys: lys with text_content = text_content = {
     in {height=h, width=w,
         rng=rng,
         iterations2=22, iterations3=14, iterations4=11,
-        time=0.0, dim=#dim3, -- XXX: Should 2D or 3D be the default?
+        time=0.0, vp_zoom=1.0, vp_center={x=0, y=0},
+        shift_key=false, dim=#dim3, -- XXX: Should 2D or 3D be the default?
         dim2_info={auto_mode=false, cur_start=0.0,
                    fractal_id=0, manual=manual_2d},
         dim3_info={auto_mode=false, cur_start=0.0,
@@ -187,6 +210,7 @@ module lys: lys with text_content = text_content = {
                     ++ "%[        |Current:] Iterations (3 transforms): %d (max: %d)\n"
                     ++ "%[        |Current:] Iterations (4 transforms): %d (max: %d)\n"
                     ++ "Particles: %d^%d = %d\n"
+                    ++ "Viewport: center (%.03f, %.03f); zoom %.03f\n"
                     ++ "Auto mode: %[disabled|enabled]\n"
                     ++ "FPS: %d"
 

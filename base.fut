@@ -7,6 +7,8 @@ module rng = xorshift128plus
 module i32dist = uniform_int_distribution i32 rng
 module f32dist = uniform_real_distribution f32 rng
 module norm_dist = normal_distribution f32 rng
+module vec2 = mk_vspace_2d f32
+module vec3 = mk_vspace_3d f32
 
 let hsl_value (n1: f32) (n2: f32) (hue: f32): f32 =
   let hue' = if hue > 6.0
@@ -58,8 +60,27 @@ module fractal_utils_extended (u: fractal_utils) = {
   open u
 
   let fractal (n_trans: i32) (pick_trans: i32 -> i32 -> point -> point)
-              (height: i32) (width: i32) (steps: i32):
+              (height: i32) (width: i32) (steps: i32)
+              (vp_zoom: f32) (vp_center: vec2.vector):
               (i32, [height][width]argb.colour) =
+--    let vp_center = (0.0, 0.0)
+--    let vp_zoom = 1.0
+
+    let xy_factor = r32 (i32.min height width)
+    let x_offset_base = r32 (i32.max 0 (width - height)) / xy_factor
+    let y_offset_base = r32 (i32.max 0 (height - width)) / xy_factor
+    let x_offset = 0.5 + x_offset_base / 2 - vp_center.x
+    let y_offset = 0.5 + y_offset_base / 2 - vp_center.y
+
+    -- Viewport
+    let xy_factor' = r32 (i32.min height width) * vp_zoom
+    -- let vp_width = 1.0 + x_offset_base
+    -- let vp_height = 1.0 + y_offset_base
+    -- let vp_width' = vp_width / vp_zoom
+    -- let vp_height' = vp_height / vp_zoom
+    -- let vp_topleft = (vp_center.1 - vp_width' / 2,
+    --                   vp_center.2 - vp_height' / 2)
+
     let particle_point (i: i32): point =
       let (p, _) = loop (p, k) = (start_point,
                                   n_trans**steps) for _step < steps do
@@ -68,13 +89,10 @@ module fractal_utils_extended (u: fractal_utils) = {
       in p
     let n_points = n_trans**steps
     let points = map particle_point (0..<n_points)
-    let xy_factor = r32 (i32.min height width)
-    let y_offset = 0.5 + r32 (i32.max 0 (height - width)) / xy_factor / 2
-    let x_offset = 0.5 + r32 (i32.max 0 (width - height)) / xy_factor / 2
     let is = map (\p ->
                     let (x0, y0) = xypos p
-                    let y = t32 ((y0 + y_offset) * xy_factor)
-                    let x = t32 ((x0 + x_offset) * xy_factor)
+                    let x = t32 (x0 * xy_factor' + x_offset * xy_factor)
+                    let y = t32 (y0 * xy_factor' + y_offset * xy_factor)
                     in if x < 0 || x >= width || y < 0 || y >= height
                        then -1
                        else y * width + x) points
@@ -108,8 +126,6 @@ module fractal_utils_extended (u: fractal_utils) = {
 }
 
 module fractal_utils_2d = fractal_utils_extended {
-  module vec2 = mk_vspace_2d f32
-
   -- | Inputs to the 2D `manual` fractal.
   type manual = {
       rotate0: f32, tfac0: f32, translate0: (f32, f32), scale0: f32,
@@ -166,8 +182,6 @@ module fractal_utils_2d = fractal_utils_extended {
 }
 
 module fractal_utils_3d = fractal_utils_extended {
-  module vec3 = mk_vspace_3d f32
-
   -- | Inputs to the 3D `manual` fractal.
   type manual = {
       rotate0: (f32, f32, f32), tfac0: (f32, f32, f32), translate0: (f32, f32, f32), scale0: f32,
@@ -286,7 +300,7 @@ module type fractals_base = {
   val fractal_from_id: i32 -> fractal
   val fractal_name: fractal -> string
   val render_fractal: fractal -> f32 -> manual -> i32 -> i32 -> i32 ->
-                      (i32, [][]argb.colour)
+                      f32 -> vec2.vector -> (i32, [][]argb.colour)
 }
 
 module type fractals = {
@@ -299,7 +313,7 @@ module type fractals = {
   val fractal_choices: i32
   val fractal_n_transforms: fractal -> manual -> i32
   val render_fractal: fractal -> f32 -> manual -> i32 -> i32 -> i32 ->
-                      [][]argb.colour
+                      f32 -> vec2.vector -> [][]argb.colour
 }
 
 module fractals (base: fractals_base): fractals = {
@@ -310,15 +324,18 @@ module fractals (base: fractals_base): fractals = {
   let fractal_from_id = base.fractal_from_id
   let fractal_name = base.fractal_name
 
-  let fractal_choices = loop i = 0i32 while ! (base.fractals_end (base.fractal_from_id i)) do i + 1
+  let fractal_choices = loop i = 0i32
+                        while ! (base.fractals_end (base.fractal_from_id i))
+                        do i + 1
 
   let fractal_n_transforms (f: base.fractal) (m: base.manual): i32 =
-    (base.render_fractal f 0.0 m 0 0 0).1 -- hack!
+    (base.render_fractal f 0.0 m 0 0 0 0.0 {x=0.0, y=0.0}).1 -- hack!
 
   let render_fractal (f: base.fractal) (time: f32) (m: base.manual)
                      (height: i32) (width: i32)
-                     (iterations: i32): [height][width]argb.colour =
-    (base.render_fractal f time m height width iterations).2
+                     (iterations: i32) (vp_zoom: f32) (vp_center: vec2.vector):
+                     [height][width]argb.colour =
+    (base.render_fractal f time m height width iterations vp_zoom vp_center).2
 }
 
 -- We are currently limited by Futhark using 32-bit integers.  We could work

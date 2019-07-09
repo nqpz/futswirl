@@ -70,7 +70,9 @@ let fractal_name (f: fractal): string =
 
 let render_fractal (f: fractal) (time: f32) (m: manual)
                    (height: i32) (width: i32)
-                   (iterations: i32): (i32, [height][width]argb.colour) =
+                   (iterations: i32)
+                   (vp_zoom: f32) (vp_center: vec2.vector):
+                   (i32, [height][width]argb.colour) =
   match f
   case #manual ->
     (match m.n_trans
@@ -78,26 +80,26 @@ let render_fractal (f: fractal) (time: f32) (m: manual)
        manual2 time
                m.rotate0 m.tfac0 m.translate0 m.scale0
                m.rotate1 m.tfac1 m.translate1 m.scale1
-               height width iterations
+               height width iterations vp_zoom vp_center
      case #trans3 ->
        manual3 time
                m.rotate0 m.tfac0 m.translate0 m.scale0
                m.rotate1 m.tfac1 m.translate1 m.scale1
                m.rotate2 m.tfac2 m.translate2 m.scale2
-               height width iterations
+               height width iterations vp_zoom vp_center
      case #trans4 ->
        manual4 time
                m.rotate0 m.tfac0 m.translate0 m.scale0
                m.rotate1 m.tfac1 m.translate1 m.scale1
                m.rotate2 m.tfac2 m.translate2 m.scale2
                m.rotate3 m.tfac3 m.translate3 m.scale3
-               height width iterations)
+               height width iterations vp_zoom vp_center)
   case #swirl ->
-    swirl time height width iterations
+    swirl time height width iterations vp_zoom vp_center
   case #dissolving_sierpinski ->
-    dissolving_sierpinski time height width iterations
+    dissolving_sierpinski time height width iterations vp_zoom vp_center
   case #fireworks_geometry ->
-    fireworks_geometry time height width iterations
+    fireworks_geometry time height width iterations vp_zoom vp_center
   case #plant ->
-    plant time height width iterations
+    plant time height width iterations vp_zoom vp_center
   case #eof -> (0, replicate height (replicate width 0))

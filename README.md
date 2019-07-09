@@ -29,6 +29,9 @@ Then run `make run` to build and run in a window.
   - Down/up: Adjust the number of iterations for the current kind of
     fractal.
   - Left/right: Change which fractal to show.
+  - PageUp/PageDown: Zoom in/out.
+  - Shift+Left/Right/Down/Up: Adjust the viewport center (useful when
+    zooming in).
 
 
 ## Contributions
