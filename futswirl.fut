@@ -14,7 +14,7 @@ module lys: lys with text_content = text_content = {
   type state = {height: i32, width: i32, rng: rng.rng,
                 iterations2: i32, iterations3: i32, iterations4: i32,
                 time: f32, vp_zoom: f32, vp_center: vec2.vector,
-                shift_key: bool, dim: #dim2 | #dim3,
+                paused: bool, shift_key: bool, dim: #dim2 | #dim3,
                 dim2_info: dim_info f2d.manual,
                 dim3_info: dim_info f3d.manual}
 
@@ -69,13 +69,15 @@ module lys: lys with text_content = text_content = {
                        in (rng, manual, s.time)
                   else (rng, (f.dim_info s).manual, (f.dim_info s).cur_start)
           else (s.rng, (f.dim_info s).manual, (f.dim_info s).cur_start)
-        in f.set_dim_info (s with time = s.time + td
-                           with rng = rng)
-                        (f.dim_info s
-                         with manual = manual
-                         with cur_start = cur_start)
+        in f.set_dim_info (s with time = (if s.paused then s.time else s.time + td)
+                             with rng = rng)
+                          (f.dim_info s
+                           with manual = manual
+                           with cur_start = cur_start)
       case #keydown {key} ->
-        if key == SDLK_LSHIFT || key == SDLK_RSHIFT
+        if key == SDLK_SPACE
+        then s with paused = !s.paused
+        else if key == SDLK_LSHIFT || key == SDLK_RSHIFT
         then s with shift_key = true
         else if key == SDLK_PAGEUP
         then s with vp_zoom = s.vp_zoom + 0.1
@@ -176,7 +178,7 @@ module lys: lys with text_content = text_content = {
         rng=rng,
         iterations2=22, iterations3=14, iterations4=11,
         time=0.0, vp_zoom=1.0, vp_center={x=0, y=0},
-        shift_key=false, dim=#dim3, -- XXX: Should 2D or 3D be the default?
+        paused=false, shift_key=false, dim=#dim3, -- XXX: Should 2D or 3D be the default?
         dim2_info={auto_mode=false, cur_start=0.0,
                    fractal_id=0, manual=manual_2d},
         dim3_info={auto_mode=false, cur_start=0.0,

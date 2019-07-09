@@ -32,6 +32,7 @@ Then run `make run` to build and run in a window.
   - PageUp/PageDown: Zoom in/out.
   - Shift+Left/Right/Down/Up: Adjust the viewport center (useful when
     zooming in).
+  - Space: pause/unpause
 
 
 ## Contributions
