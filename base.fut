@@ -66,8 +66,8 @@ module fractal_utils_extended (u: fractal_utils) = {
     let xy_factor = r32 (i32.min height width)
     let x_offset_base = r32 (i32.max 0 (width - height)) / xy_factor
     let y_offset_base = r32 (i32.max 0 (height - width)) / xy_factor
-    let x_offset = 0.5 + x_offset_base / 2 - vp_center.x
-    let y_offset = 0.5 + y_offset_base / 2 - vp_center.y
+    let x_offset = 0.5 + x_offset_base / 2
+    let y_offset = 0.5 + y_offset_base / 2
 
     -- Viewport
     let xy_factor' = r32 (i32.min height width) * vp_zoom
@@ -82,8 +82,8 @@ module fractal_utils_extended (u: fractal_utils) = {
     let points = map particle_point (0..<n_points)
     let is = map (\p ->
                     let (x0, y0) = xypos p
-                    let x = t32 (x0 * xy_factor' + x_offset * xy_factor)
-                    let y = t32 (y0 * xy_factor' + y_offset * xy_factor)
+                    let x = t32 (x0 * xy_factor' + x_offset * xy_factor - vp_center.x * xy_factor')
+                    let y = t32 (y0 * xy_factor' + y_offset * xy_factor - vp_center.y * xy_factor')
                     in if x < 0 || x >= width || y < 0 || y >= height
                        then -1
                        else y * width + x) points
