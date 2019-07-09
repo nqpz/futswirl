@@ -63,9 +63,6 @@ module fractal_utils_extended (u: fractal_utils) = {
               (height: i32) (width: i32) (steps: i32)
               (vp_zoom: f32) (vp_center: vec2.vector):
               (i32, [height][width]argb.colour) =
---    let vp_center = (0.0, 0.0)
---    let vp_zoom = 1.0
-
     let xy_factor = r32 (i32.min height width)
     let x_offset_base = r32 (i32.max 0 (width - height)) / xy_factor
     let y_offset_base = r32 (i32.max 0 (height - width)) / xy_factor
@@ -74,12 +71,6 @@ module fractal_utils_extended (u: fractal_utils) = {
 
     -- Viewport
     let xy_factor' = r32 (i32.min height width) * vp_zoom
-    -- let vp_width = 1.0 + x_offset_base
-    -- let vp_height = 1.0 + y_offset_base
-    -- let vp_width' = vp_width / vp_zoom
-    -- let vp_height' = vp_height / vp_zoom
-    -- let vp_topleft = (vp_center.1 - vp_width' / 2,
-    --                   vp_center.2 - vp_height' / 2)
 
     let particle_point (i: i32): point =
       let (p, _) = loop (p, k) = (start_point,
