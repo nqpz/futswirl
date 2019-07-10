@@ -80,17 +80,17 @@ module lys: lys with text_content = text_content = {
         else if key == SDLK_LSHIFT || key == SDLK_RSHIFT
         then s with shift_key = true
         else if key == SDLK_PAGEUP
-        then s with vp_zoom = s.vp_zoom + 0.1
+        then s with vp_zoom = s.vp_zoom * 1.1
         else if key == SDLK_PAGEDOWN
-        then s with vp_zoom = f32.max 0.1 (s.vp_zoom - 0.1)
+        then s with vp_zoom = f32.max 0.001 (s.vp_zoom / 1.1)
         else if key == SDLK_LEFT && s.shift_key
-        then s with vp_center.x = s.vp_center.x - 0.01 / (f32.sqrt s.vp_zoom)
+        then s with vp_center.x = s.vp_center.x - 0.01 / s.vp_zoom
         else if key == SDLK_RIGHT && s.shift_key
-        then s with vp_center.x = s.vp_center.x + 0.01 / (f32.sqrt s.vp_zoom)
+        then s with vp_center.x = s.vp_center.x + 0.01 / s.vp_zoom
         else if key == SDLK_UP && s.shift_key
-        then s with vp_center.y = s.vp_center.y - 0.01 / (f32.sqrt s.vp_zoom)
+        then s with vp_center.y = s.vp_center.y - 0.01 / s.vp_zoom
         else if key == SDLK_DOWN && s.shift_key
-        then s with vp_center.y = s.vp_center.y + 0.01 / (f32.sqrt s.vp_zoom)
+        then s with vp_center.y = s.vp_center.y + 0.01 / s.vp_zoom
         else if key == SDLK_LEFT
         then set_fractal_id s (fractal_id s - 1)
         else if key == SDLK_RIGHT
