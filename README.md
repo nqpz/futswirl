@@ -11,7 +11,7 @@ libraries with associated header files.
 
 ## Building and running
 
-First run `futhark pkg sync` once (and again upon new pulls).
+First run `futhark pkg sync` once.
 
 Then run `make run` to build and run in a window.
 
