@@ -1,5 +1,7 @@
 # futswirl
 
+[![Build Status](https://travis-ci.org/nqpz/futswirl.svg?branch=master)](https://travis-ci.org/nqpz/futswirl)
+
 ![Screenshot](swirl.png)
 
 futswirl is a small framework for working with
