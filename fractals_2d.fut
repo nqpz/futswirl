@@ -80,8 +80,8 @@ let fractal_name (f: fractal): string =
 let render_fractal (f: fractal) (time: f32) (m: manual)
                    (height: i32) (width: i32)
                    (iterations: i32)
-                   (vp_zoom: f32) (vp_center: vec2.vector):
-                   (i32, [height][width]argb.colour) =
+                   (vp_zoom: f32) (vp_center: vec2.vector)
+                   (render_approach: render_approach): render_result =
   match f
   case #manual ->
     (match m.n_trans
@@ -90,27 +90,31 @@ let render_fractal (f: fractal) (time: f32) (m: manual)
                m.rotate0 m.tfac0 m.translate0 m.scale0
                m.rotate1 m.tfac1 m.translate1 m.scale1
                height width iterations vp_zoom vp_center
+               render_approach
      case #trans3 ->
        manual3 time
                m.rotate0 m.tfac0 m.translate0 m.scale0
                m.rotate1 m.tfac1 m.translate1 m.scale1
                m.rotate2 m.tfac2 m.translate2 m.scale2
                height width iterations vp_zoom vp_center
+               render_approach
      case #trans4 ->
        manual4 time
                m.rotate0 m.tfac0 m.translate0 m.scale0
                m.rotate1 m.tfac1 m.translate1 m.scale1
                m.rotate2 m.tfac2 m.translate2 m.scale2
                m.rotate3 m.tfac3 m.translate3 m.scale3
-               height width iterations vp_zoom vp_center)
+               height width iterations vp_zoom vp_center
+               render_approach)
   case #swirl ->
-    swirl time height width iterations vp_zoom vp_center
+    swirl time height width iterations vp_zoom vp_center render_approach
   case #dissolving_sierpinski ->
-    dissolving_sierpinski time height width iterations vp_zoom vp_center
+    dissolving_sierpinski time height width iterations vp_zoom vp_center render_approach
   case #fireworks_geometry ->
-    fireworks_geometry time height width iterations vp_zoom vp_center
+    fireworks_geometry time height width iterations vp_zoom vp_center render_approach
   case #plant ->
-    plant time height width iterations vp_zoom vp_center
+    plant time height width iterations vp_zoom vp_center render_approach
   case #trigonometry ->
-    trigonometry time height width iterations vp_zoom vp_center
-  case #eof -> (0, replicate height (replicate width 0))
+    trigonometry time height width iterations vp_zoom vp_center render_approach
+  case #eof -> {n_trans=0, n_points=0, n_iterations=0, rot_square_radius=0,
+                render=replicate height (replicate width 0)}
