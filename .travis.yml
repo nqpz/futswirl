@@ -23,9 +23,4 @@ install:
   - cp settings_template.fut settings.fut
 
 script:
-  - futhark test --no-terminal lib
-  - make
-  - futhark pkg upgrade
-  - futhark pkg sync
-  - futhark test --no-terminal lib
   - make
