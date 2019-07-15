@@ -8,7 +8,7 @@ module f3d_base = import "swirl/fractals_3d"
 module f2d = fractals_wrapper manual_2d (f2d_base.fractals f32e) (f2d_base.fractals f64e)
 module f3d = fractals_wrapper manual_3d (f3d_base.fractals f32e) (f3d_base.fractals f64e)
 
-type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i64, i32, f64, f64, f64,
+type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, f64, i32, f64, f64, f64,
                      i32, i32, i32, f64, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
   type text_content = text_content
@@ -218,7 +218,7 @@ module lys: lys with text_content = text_content = {
           f.fid_offset + fractal_id s,
           n_trans,
           s.render.n_iterations,
-          n_trans, s.render.n_iterations, i64.i32 n_trans**i64.i32 s.render.n_iterations,
+          n_trans, s.render.n_iterations, f64.i32 n_trans**f64.i32 s.render.n_iterations,
           s.render.n_points,
           s.vp_center.x, s.vp_center.y, s.vp_zoom,
           i32.bool (f.dim_info s).auto_mode,
@@ -302,7 +302,7 @@ module lys: lys with text_content = text_content = {
                     ++ "]\n"
                     ++ "Branch factor: %d\n"
                     ++ "Iterations: %d\n"
-                    ++ "Particles (without culling): %d^%d = %ld\n"
+                    ++ "Particles (without culling): %d^%d ≈ %.0lf\n"
                     ++ "Particles (with culling): %d\n"
                     ++ "Viewport: center (%.03le, %.03le); zoom %.03le\n"
                     ++ "Auto mode: %[disabled|enabled]\n"
