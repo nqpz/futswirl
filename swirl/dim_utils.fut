@@ -81,7 +81,8 @@ module fractal_utils_extended (float: float_extended)
       case #cullbranches ->
         let (points, _, iterations') =
           loop (points, cur_scale, step) = ([start_point vp_zoom], vp_zoom, 0)
-          while length points * n_trans * point_bytes < settings.cullbranches_bytes
+          while i64.i32 (length points) * i64.i32 n_trans * i64.i32 point_bytes
+                < settings.cullbranches_bytes
           do let points = flatten (map (\p -> all_trans p vp_center cur_scale vp_zoom
                                                         (x_offset, y_offset)) points)
              let points = filter (\p -> !(float.isinf (xypos p vp_zoom).1)) points

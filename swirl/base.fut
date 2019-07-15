@@ -9,7 +9,7 @@ module f32dist = uniform_real_distribution f32 rng
 type render_approach = #scalarloop | #cullbranches
 
 module settings: {
-  val cullbranches_bytes: i32
+  val cullbranches_bytes: i64
   val iterations2: i32
   val iterations3: i32
   val iterations4: i32
