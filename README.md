@@ -51,6 +51,7 @@ futswirl supports two ways of rendering fractals:
     once in a while.
   - `r`: Toggle between the two rendering approaches.
   - `d`: Toggle between 2D fractals and 3D fractals.
+  - `f`: Toggle between 32-bit floats and 64-bit floats.
   - Left/right: Change which fractal to show.
   - Down/up: Adjust the number of iterations for the current kind of
     fractal (only affects the scalarloop rendering approach).
@@ -69,7 +70,7 @@ manageable pace even when the viewport is small.
 
 ## Adding new fractals
 
-Define your fractals in `fractals_2d.fut` and `fractals_3d.fut`.
+Define your fractals in `swirl/fractals_2d.fut` and `swirl/fractals_3d.fut`.
 
 
 ## License

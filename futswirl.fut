@@ -1,36 +1,57 @@
-import "base"
+import "swirl/base"
+import "swirl/manual"
+import "swirl/fractals"
 
-module f2d = fractals (import "fractals_2d")
-module f3d = fractals (import "fractals_3d")
+module f2d_base = import "swirl/fractals_2d"
+module f3d_base = import "swirl/fractals_3d"
 
-type text_content = (i32, i32, i32, i32, i32, i32, i32, i64, i32, f32, f32, f32, i32,
-                     i32, i32, f32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
+module f2d = fractals_wrapper manual_2d (f2d_base.fractals f32e) (f2d_base.fractals f64e)
+module f3d = fractals_wrapper manual_3d (f3d_base.fractals f32e) (f3d_base.fractals f64e)
+
+type text_content = (i32, i32, i32, i32, i32, i32, i32, i32, i32, i64, i32, f64, f64, f64,
+                     i32, i32, i32, f64, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32)
 module lys: lys with text_content = text_content = {
   type text_content = text_content
 
-  type dim_info 'manual = {auto_mode: bool, cur_start: f32, fractal_id: i32,
-                           manual: manual}
+  module vec2 = vec2_f64
+
+  type dim_info 'manual32 'manual64 =
+    {auto_mode: bool, cur_start: f64, fractal_id: i32,
+     manual: (manual32, manual64)}
 
   type state = {height: i32, width: i32, rng: rng.rng,
                 iterations2: i32, iterations3: i32, iterations4: i32,
-                time: f32, vp_zoom: f32, vp_center: vec2.vector,
-                render: render_result, render_approach: render_approach,
+                time: f64, vp_zoom: f64, vp_center: vec2.vector,
+                render: render_result_base f64, render_approach: render_approach,
                 paused: bool, shift_key: bool, mouse: (i32, i32),
-                auto_zoom: bool, auto_zoom_zoom_factor: f32,
+                auto_zoom: bool, auto_zoom_zoom_factor: f64,
+                float_bits: float_bits,
                 dim: #dim2 | #dim3,
-                dim2_info: dim_info f2d.manual,
-                dim3_info: dim_info f3d.manual}
+                dim2_info: dim_info f2d.manual32 f2d.manual64,
+                dim3_info: dim_info f3d.manual32 f3d.manual64}
 
-  module type fractals_base = {
-    include fractals
+  module type lys_fractals_base = {
+    type fractal
+    type manual32
+    type manual64
+    type manual = (manual32, manual64)
 
-    val dim_info: state -> dim_info manual
-    val set_dim_info: state -> dim_info manual -> state
+    val gen_manual: rng.rng -> gen_manual_constraint -> (rng.rng, manual)
+
+    val fractal_from_id: i32 -> fractal
+    val fractal_name: fractal -> string
+    val render_fractal: float_bits -> fractal -> f64 -> manual -> i32 -> i32 -> i32 ->
+                        f64 -> vec2.vector -> render_approach ->
+                        render_result_base f64
+
+    val fractal_choices: i32
+    val dim_info: state -> dim_info manual32 manual64
+    val set_dim_info: state -> dim_info manual32 manual64 -> state
     val dim_id: i32
     val fid_offset: i32
   }
 
-  module fractals_extended (f: fractals_base) = {
+  module fractals_extended (f: lys_fractals_base) = {
     -- | Set the id of the fractal to show.
     let fractal_id (s: state): i32 =
       (f.dim_info s).fractal_id % f.fractal_choices
@@ -47,17 +68,24 @@ module lys: lys with text_content = text_content = {
       then s.iterations3
       else s.iterations4
 
+    -- We are currently limited by Futhark using 32-bit integers.  We could work
+    -- around this, but in practice having that many particles is very slow, so
+    -- we we use this check for now.  Only applies to the scalarloop render
+    -- approach.
+    let max_iterations (n_trans: i32): i32 =
+      t64 (f64.log (2**31 - 4096) / f64.log (r64 n_trans))
+
     -- | Set the number of iterations for the current fractal.
     let set_scalarloop_iterations (s: state) (iter: i32): state =
       if s.render.n_trans == 2 then s with iterations2 = iter
       else if s.render.n_trans == 3 then s with iterations3 = iter
       else s with iterations4 = iter
 
-    let zoom_at_mouse (zoom_factor: f32) (s: state): state =
-      let xy_factor = r32 (i32.min s.height s.width) * s.vp_zoom
-      let xb = r32 (s.mouse.1 - s.width / 2)
+    let zoom_at_mouse (zoom_factor: f64) (s: state): state =
+      let xy_factor = r64 (i32.min s.height s.width) * s.vp_zoom
+      let xb = r64 (s.mouse.1 - s.width / 2)
       let xd = xb / xy_factor - xb / (xy_factor * zoom_factor)
-      let yb = r32 (s.mouse.2 - s.height / 2)
+      let yb = r64 (s.mouse.2 - s.height / 2)
       let yd = yb / xy_factor - yb / (xy_factor * zoom_factor)
       in s with vp_zoom = s.vp_zoom * zoom_factor
            with vp_center.x = s.vp_center.x + xd
@@ -69,7 +97,7 @@ module lys: lys with text_content = text_content = {
         let (rng, manual, cur_start) =
           if (f.dim_info s).auto_mode
           then let tdiff = s.time - (f.dim_info s).cur_start
-               let (rng, x) = dist.rand (0, 10000 / tdiff) s.rng
+               let (rng, x) = f32dist.rand (0, 10000 / f32.f64 tdiff) s.rng
                in if x < 0.95
                   -- There is 95% chance of generating a new fractal after showing
                   -- the current one for 10 seconds.
@@ -77,7 +105,7 @@ module lys: lys with text_content = text_content = {
                        in (rng, manual, s.time)
                   else (rng, (f.dim_info s).manual, (f.dim_info s).cur_start)
           else (s.rng, (f.dim_info s).manual, (f.dim_info s).cur_start)
-        let s = s with time = (if s.paused then s.time else s.time + td / s.vp_zoom)
+        let s = s with time = (if s.paused then s.time else s.time + f64.f32 td / s.vp_zoom)
                   with rng = rng
                   with render = let iter = scalarloop_iterations s
                                 let iter' = match s.render_approach
@@ -85,7 +113,7 @@ module lys: lys with text_content = text_content = {
                                               let max_iter = max_iterations (s.render.n_trans)
                                               in i32.min iter max_iter
                                             case #cullbranches -> iter
-                                in f.render_fractal (f.fractal_from_id (fractal_id s))
+                                in f.render_fractal s.float_bits (f.fractal_from_id (fractal_id s))
                                                     s.time (f.dim_info s).manual
                                                     s.height s.width iter'
                                                     s.vp_zoom s.vp_center
@@ -104,7 +132,7 @@ module lys: lys with text_content = text_content = {
         else if key == SDLK_PAGEUP
         then s with vp_zoom = s.vp_zoom * 1.1
         else if key == SDLK_PAGEDOWN
-        then s with vp_zoom = f32.max 0.001 (s.vp_zoom / 1.1)
+        then s with vp_zoom = f64.max 0.001 (s.vp_zoom / 1.1)
         else if key == SDLK_HOME
         then s with vp_zoom = 1
                with vp_center = {x=0, y=0}
@@ -128,6 +156,10 @@ module lys: lys with text_content = text_content = {
         then s with dim = match s.dim
                           case #dim2 -> #dim3
                           case #dim3 -> #dim2
+        else if key == SDLK_f
+        then s with float_bits = match s.float_bits
+                          case #f32 -> #f64
+                          case #f64 -> #f32
         else if key == SDLK_r
         then s with render_approach = match s.render_approach
                                       case #scalarloop -> #cullbranches
@@ -159,11 +191,11 @@ module lys: lys with text_content = text_content = {
         let y_diff = s.mouse.2 - y
         let s = s with mouse = (x, y)
 
-        let xy_factor = r32 (i32.min s.height s.width) * s.vp_zoom
+        let xy_factor = r64 (i32.min s.height s.width) * s.vp_zoom
 
         let s = if buttons & 1 == 1 || buttons & 4 == 4
-                then s with vp_center.x = s.vp_center.x + r32 x_diff / xy_factor
-                       with vp_center.y = s.vp_center.y + r32 y_diff / xy_factor
+                then s with vp_center.x = s.vp_center.x + r64 x_diff / xy_factor
+                       with vp_center.y = s.vp_center.y + r64 y_diff / xy_factor
                 else s
         let s = if buttons & 4 == 4
                 then s with auto_zoom = true
@@ -171,8 +203,8 @@ module lys: lys with text_content = text_content = {
         in s
       case #wheel {dx=_, dy} ->
         if s.auto_zoom
-        then s with auto_zoom_zoom_factor = s.auto_zoom_zoom_factor + r32 dy * 0.01
-        else let zoom_factor = 1 + r32 dy * 0.01
+        then s with auto_zoom_zoom_factor = s.auto_zoom_zoom_factor + r64 dy * 0.01
+        else let zoom_factor = 1 + r64 dy * 0.01
              in zoom_at_mouse zoom_factor s
       case _ -> s
 
@@ -181,7 +213,9 @@ module lys: lys with text_content = text_content = {
 
     let text_content (fps: f32) (s: state): text_content =
       let n_trans = s.render.n_trans
-      in (i32.bool (f.dim_id == 0), i32.bool (f.dim_id == 1), f.fid_offset + fractal_id s,
+      in (i32.bool (f.dim_id == 0), i32.bool (f.dim_id == 1),
+          i32.bool (s.float_bits == #f32), i32.bool (s.float_bits == #f64),
+          f.fid_offset + fractal_id s,
           n_trans,
           s.render.n_iterations,
           n_trans, s.render.n_iterations, i64.i32 n_trans**i64.i32 s.render.n_iterations,
@@ -201,8 +235,8 @@ module lys: lys with text_content = text_content = {
     open f2d
     let dim_id = 0i32
     let fid_offset = 0i32
-    let dim_info (s: state): dim_info manual = s.dim2_info
-    let set_dim_info (s: state) (d: dim_info manual): state =
+    let dim_info (s: state): dim_info manual32 manual64 = s.dim2_info
+    let set_dim_info (s: state) (d: dim_info manual32 manual64): state =
       s with dim2_info = d
   }
 
@@ -210,8 +244,8 @@ module lys: lys with text_content = text_content = {
     open f3d
     let dim_id = 1i32
     let fid_offset = f2d.fractal_choices
-    let dim_info (s: state): dim_info manual = s.dim3_info
-    let set_dim_info (s: state) (d: dim_info manual): state =
+    let dim_info (s: state): dim_info manual32 manual64 = s.dim3_info
+    let set_dim_info (s: state) (d: dim_info manual32 manual64): state =
       s with dim3_info = d
   }
 
@@ -233,6 +267,7 @@ module lys: lys with text_content = text_content = {
                 rot_square_radius=0,
                 render=replicate h (replicate w 0)},
         render_approach=#cullbranches,
+        float_bits=#f32,
         dim=#dim2,
         dim2_info={auto_mode=false, cur_start=0.0,
                    fractal_id=0, manual=manual_2d},
@@ -257,7 +292,9 @@ module lys: lys with text_content = text_content = {
     case #dim2 -> f2de.text_content fps s
     case #dim3 -> f3de.text_content fps s
 
-  let text_format = "[%[ |X]] 2D  [%[ |X]] 3D; fractal: %["
+  let text_format = "Dimensions: [%[ |X]] 2D  [%[ |X]] 3D\n"
+                    ++ "Float size: [%[ |X]] 32 bits  [%[ |X]] 64 bits\n"
+                    ++ "Fractal: %["
                     ++ (loop s = "" for i < f2d.fractal_choices do
                           s ++ "|" ++ f2d.fractal_name (f2d.fractal_from_id i))[1:]
                     ++ (loop s = "" for i < f3d.fractal_choices do
@@ -267,12 +304,12 @@ module lys: lys with text_content = text_content = {
                     ++ "Iterations: %d\n"
                     ++ "Particles (without culling): %d^%d = %ld\n"
                     ++ "Particles (with culling): %d\n"
-                    ++ "Viewport: center (%.03e, %.03e); zoom %.03e\n"
+                    ++ "Viewport: center (%.03le, %.03le); zoom %.03le\n"
                     ++ "Auto mode: %[disabled|enabled]\n"
                     ++ "FPS: %d\n"
                     ++ " \n"
                     ++ "[%[ |X]] cullbranches rendering:\n"
-                    ++ "Rotated square radius: %.03f\n"
+                    ++ "Rotated square radius: %.03lf\n"
                     ++ " \n"
                     ++ "[%[ |X]] scalarloop rendering:\n"
                     ++ "%[        |Current:] Iterations (2 transforms): %d (max: %d)\n"
