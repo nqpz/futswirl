@@ -7,4 +7,4 @@ let iterations4 = 11i32
 -- to use.  Increase to be able to draw more points.  Decrease to avoid crashing
 -- the program because of out-of-memory errors.  The best value depends both on
 -- the size of your GPU memory and on Futhark's general memory usage.
-let cullbranches_bytes = 512i32**3
+let cullbranches_bytes = 512i32 * 1024**2
