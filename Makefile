@@ -1,8 +1,8 @@
-.PHONY: all clean
+.PHONY: all clean settings_typecheck
 
 PROGNAME=futswirl
 LYS_MAKEFILE=lib/github.com/diku-dk/lys/common.mk
-BASE_LOCAL_DEPS=settings.fut lib
+BASE_LOCAL_DEPS=settings.fut settings_typecheck lib
 
 all:
 	$(MAKE) $(BASE_LOCAL_DEPS)
@@ -21,3 +21,6 @@ lib: futhark.pkg
 
 settings.fut: settings_template.fut
 	cp settings_template.fut settings.fut
+
+settings_typecheck:
+	@futhark dev settings.fut || echo "NOTE: futswirl has been updated; please edit settings.fut according to the compiler output, or replace it with the contents of settings_template.fut."
