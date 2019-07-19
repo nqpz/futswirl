@@ -7,6 +7,10 @@ all:
 	$(MAKE) settings.fut
 	PROGNAME=$(PROGNAME) $(MAKE) --file=$(LYS_MAKEFILE)
 
+run:
+	$(MAKE) settings.fut
+	PROGNAME=$(PROGNAME) $(MAKE) --file=$(LYS_MAKEFILE) run
+
 clean:
 	$(MAKE) settings.fut
 	PROGNAME=$(PROGNAME) $(MAKE) --file=$(LYS_MAKEFILE) clean
