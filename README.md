@@ -13,10 +13,10 @@ libraries with associated header files.
 
 ## Building and running
 
-**Initial setup:** Run `futhark pkg sync`.  Copy `settings_template.fut`
-to `settings.fut` and maybe adjust values.
+**Initial setup:** Run `futhark pkg sync`.
 
-**General use:** Run `make run` to build and run in a window.
+**General use:** Run `make run` to build and run in a window.  Adjust
+settings in `settings.fut`.
 
 
 ## Rendering approaches
