@@ -56,7 +56,7 @@ module fractal_utils_extended (float: float_extended)
                          then -1
                          else y * width + x) points
       let frame = replicate (height * width) 0
-      let vs = replicate (length points) 1
+      let vs = map (const 1) points
       let frame' = reduce_by_index frame (+) 0 is vs
       let max_depth = reduce i32.max 0 frame'
       let frame'' = map (\depth ->
