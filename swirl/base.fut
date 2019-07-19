@@ -3,17 +3,15 @@ import "../lib/github.com/athas/matte/colour"
 import "../lib/github.com/diku-dk/cpprandom/random"
 import "../lib/github.com/diku-dk/lys/lys"
 
+import "settings"
+
 module rng = xorshift128plus
 module f32dist = uniform_real_distribution f32 rng
 
 type render_approach = #scalarloop | #cullbranches
 
-module settings: {
-  val cullbranches_bytes: i64
-  val iterations2: i32
-  val iterations3: i32
-  val iterations4: i32
-} = import "../settings"
+module settings_module = import "../settings"
+module settings: settings = settings_module.settings
 
 type render_result_base 't = {n_trans: i32,
                               n_points: i32,
