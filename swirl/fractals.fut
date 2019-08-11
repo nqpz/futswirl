@@ -1,5 +1,6 @@
 import "base"
 import "manual"
+import "float_dual"
 
 module type fractals_base = {
   type float
@@ -50,15 +51,24 @@ module fractals_wrapper (manual: manual)
     let manual32 = manual.manual_from_f64 manual64
     in (rng, (manual32, manual64))
 
-  let render_fractal (fb: float_bits) (f: fractal) (time: f64) (m: manual)
+  let render_fractal (fb: float_bits) (f: fractal) (time: float_dual) (m: manual)
                      (height: i32) (width: i32) (iterations: i32)
-                     (vp_zoom: f64) (vp_center: vec2_f64.vector)
-                     (render_approach: render_approach): f64e.render_result =
+                     (vp_zoom: float_dual) (vp_center: vec2_float_dual.vector)
+                     (render_approach: render_approach): render_result_base float_dual =
     match fb
     case #f32 ->
-      let res = b32.render_fractal f (f32.f64 time) m.1 height width iterations (f32.f64 vp_zoom) {x=f32.f64 vp_center.x, y=f32.f64 vp_center.y} render_approach
+      let res = b32.render_fractal f (float_dual.to_f32 time) m.1 height width iterations
+                (float_dual.to_f32 vp_zoom) {x=float_dual.to_f32 vp_center.x, y=float_dual.to_f32 vp_center.y}
+                render_approach
       in {n_trans=res.n_trans, n_points=res.n_points, n_iterations=res.n_iterations,
-          rot_square_radius=f64.f32 res.rot_square_radius, render=res.render}
+          rot_square_radius={f32=res.rot_square_radius, f64=f64.f32 res.rot_square_radius}, render=res.render}
     case #f64 ->
-      b64.render_fractal f time m.2 height width iterations vp_zoom vp_center render_approach
+      if settings.enable_f64
+      then let res = b64.render_fractal f (float_dual.to_f64 time) m.2 height width iterations
+                     (float_dual.to_f64 vp_zoom) {x=float_dual.to_f64 vp_center.x, y=float_dual.to_f64 vp_center.y}
+                     render_approach
+           in {n_trans=res.n_trans, n_points=res.n_points, n_iterations=res.n_iterations,
+               rot_square_radius={f32=f32.f64 res.rot_square_radius, f64=res.rot_square_radius}, render=res.render}
+      else {n_trans=0, n_points=0, n_iterations=0, rot_square_radius=fdc 0,
+            render=replicate height (replicate width 0)} -- dummy value
 }

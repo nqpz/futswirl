@@ -3,4 +3,5 @@ module type settings = {
   val iterations2: i32
   val iterations3: i32
   val iterations4: i32
+  val enable_f64: bool
 }

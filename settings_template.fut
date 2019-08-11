@@ -15,4 +15,8 @@ module settings: settings = {
   let iterations2 = 22i32
   let iterations3 = 14i32
   let iterations4 = 11i32
+
+  -- Support using 64-bit floats.  Disable this feature if your GPU only
+  -- supports 32-bit float operations.
+  let enable_f64 = true
 }
