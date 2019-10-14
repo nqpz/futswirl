@@ -9,7 +9,7 @@ module type fractals_base = {
   type manual
   type fractal
 
-  val gen_manual: rng.rng -> gen_manual_constraint -> (rng.rng, manual_base f64)
+  val gen_manual: rng -> gen_manual_constraint -> (rng, manual_base f64)
 
   val manual_from_f64: manual_base f64 -> manual_base f32
 
@@ -46,7 +46,7 @@ module fractals_wrapper (manual: manual)
                         while ! (b32.fractals_end (b32.fractal_from_id i))
                         do i + 1
 
-  let gen_manual (rng: rng.rng) (c: gen_manual_constraint): (rng.rng, manual) =
+  let gen_manual (rng: rng) (c: gen_manual_constraint): (rng, manual) =
     let (rng, manual64) = manual.gen_manual rng c
     let manual32 = manual.manual_from_f64 manual64
     in (rng, (manual32, manual64))
