@@ -77,6 +77,7 @@ module float_dual: (float_with_to_conv with t = float_dual with int_t = uint_dua
   let (-) = op2 (f32m.-) (f64m.-)
   let (*) = op2 (f32m.*) (f64m.*)
   let (/) = op2 (f32m./) (f64m./)
+  let (%) = op2 (f32m.%) (f64m.%)
   let (**) = op2 (f32m.**) (f64m.**)
 
   let u8  (x: u8)  = op1' f32m.u8 f64m.u8 x
@@ -128,6 +129,8 @@ module float_dual: (float_with_to_conv with t = float_dual with int_t = uint_dua
   let atan2 = op2 f32m.atan2 f64m.atan2
   let gamma = op1 f32m.gamma f64m.gamma
   let lgamma = op1 f32m.lgamma f64m.lgamma
+  let lerp (v0: t) (v1: t) (t: t): t = {f32=f32m.lerp v0.f32 v1.f32 t.f32,
+                                        f64=f64m.lerp v0.f64 v1.f64 t.f64}
 
   let ceil = op1 f32m.ceil f64m.ceil
   let floor = op1 f32m.floor f64m.floor
