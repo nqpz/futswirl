@@ -18,7 +18,7 @@ module lys: lys with text_content = text_content = {
     {auto_mode: bool, cur_start: float_dual, fractal_id: i32,
      manual: (manual32, manual64)}
 
-  type state = {height: i32, width: i32, rng: rng.rng,
+  type state = {height: i32, width: i32, rng: rng,
                 iterations2: i32, iterations3: i32, iterations4: i32,
                 time: float_dual, vp_zoom: float_dual, vp_center: vec2_float_dual.vector,
                 render: render_result_base float_dual, render_approach: render_approach,
@@ -35,7 +35,7 @@ module lys: lys with text_content = text_content = {
     type manual64
     type manual = (manual32, manual64)
 
-    val gen_manual: rng.rng -> gen_manual_constraint -> (rng.rng, manual)
+    val gen_manual: rng -> gen_manual_constraint -> (rng, manual)
 
     val fractal_from_id: i32 -> fractal
     val fractal_name: fractal -> string
@@ -253,7 +253,7 @@ module lys: lys with text_content = text_content = {
   let grab_mouse = false
 
   let init (seed: i32) (h: i32) (w: i32): state =
-    let rng = rng.rng_from_seed [seed]
+    let rng = rnge.rng_from_seed [seed]
     let (rng, manual_2d) = f2d.gen_manual rng (#trans 3)
     let (rng, manual_3d) = f3d.gen_manual rng (#trans 3)
     in {height=h, width=w,

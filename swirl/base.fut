@@ -5,8 +5,9 @@ import "../lib/github.com/diku-dk/lys/lys"
 
 import "settings"
 
-module rng = xorshift128plus
-module f32dist = uniform_real_distribution f32 rng
+module rnge = xorshift128plus
+module f32dist = uniform_real_distribution f32 rnge
+type rng = rnge.rng
 
 type render_approach = #scalarloop | #cullbranches
 
@@ -26,20 +27,20 @@ module type float_extended = {
 
   val from_i32: i32 -> t
 
-  val gen_float: rng.rng -> (rng.rng, t)
+  val gen_float: rnge.rng -> (rng, t)
 }
 
 module mk_float_extended (float: float): float_extended with t = float.t = {
   open float
 
-  module norm_dist = normal_distribution float rng
+  module norm_dist = normal_distribution float rnge
 
   type render_result = render_result_base t
 
   let from_i32 = f64 <-< r64
 
   -- | Generate a f32 between -0.5 and +0.5, with most values close to 0.0.
-  let gen_float (rng: rng.rng): (rng.rng, t) =
+  let gen_float (rng: rng): (rng, t) =
     let (rng, x) = norm_dist.rand {mean=float.f64 0, stddev=float.f64 0.1} rng
     let k = float.f64 0.5
     let x = float.(if x < negate k then negate k
