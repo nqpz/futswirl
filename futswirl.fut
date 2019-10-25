@@ -303,7 +303,7 @@ module lys: lys with text_content = text_content = {
                     ++ "]\n"
                     ++ "Branch factor: %d\n"
                     ++ "Iterations: %d\n"
-                    ++ "Particles (without culling): %d^%d ≈ %.0l\n"
+                    ++ "Particles (without culling): %d^%d ≈ %.03le\n"
                     ++ "Particles (with culling): %d\n"
                     ++ "Viewport: center (%.03le, %.03le); zoom %.03le\n"
                     ++ "Auto mode: %[disabled|enabled]\n"
