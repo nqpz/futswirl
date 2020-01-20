@@ -18,16 +18,20 @@ module lys: lys with text_content = text_content = {
     {auto_mode: bool, cur_start: float_dual, fractal_id: i32,
      manual: (manual32, manual64)}
 
-  type state = {height: i32, width: i32, rng: rng,
-                iterations2: i32, iterations3: i32, iterations4: i32,
-                time: float_dual, vp_zoom: float_dual, vp_center: vec2_float_dual.vector,
-                render: render_result_base float_dual, render_approach: render_approach,
-                paused: bool, shift_key: bool, mouse: (i32, i32),
-                auto_zoom: bool, auto_zoom_zoom_factor: float_dual,
-                float_bits: float_bits,
-                dim: #dim2 | #dim3,
-                dim2_info: dim_info f2d.manual32 f2d.manual64,
-                dim3_info: dim_info f3d.manual32 f3d.manual64}
+  -- A hack because we need this type in a module type as well.
+  type sized_state [h][w] =
+    {height: i32, width: i32, rng: rng,
+     iterations2: i32, iterations3: i32, iterations4: i32,
+     time: float_dual, vp_zoom: float_dual, vp_center: vec2_float_dual.vector,
+     render: render_result_base [h][w] float_dual, render_approach: render_approach,
+     paused: bool, shift_key: bool, mouse: (i32, i32),
+     auto_zoom: bool, auto_zoom_zoom_factor: float_dual,
+     float_bits: float_bits,
+     dim: #dim2 | #dim3,
+     dim2_info: dim_info f2d.manual32 f2d.manual64,
+     dim3_info: dim_info f3d.manual32 f3d.manual64}
+
+  type state = sized_state [][]
 
   module type lys_fractals_base = {
     type fractal
@@ -38,14 +42,15 @@ module lys: lys with text_content = text_content = {
     val gen_manual: rng -> gen_manual_constraint -> (rng, manual)
 
     val fractal_from_id: i32 -> fractal
-    val fractal_name: fractal -> string
-    val render_fractal: float_bits -> fractal -> float_dual -> manual -> i32 -> i32 -> i32 ->
+    val fractal_name: fractal -> string []
+    val render_fractal: float_bits -> fractal -> float_dual -> manual ->
+                        (h: i32) -> (w: i32) -> i32 ->
                         float_dual -> vec2_float_dual.vector -> render_approach ->
-                        render_result_base float_dual
+                        render_result_base [h][w] float_dual
 
     val fractal_choices: i32
-    val dim_info: state -> dim_info manual32 manual64
-    val set_dim_info: state -> dim_info manual32 manual64 -> state
+    val dim_info [h][w]: sized_state [h][w] -> dim_info manual32 manual64
+    val set_dim_info [h][w]: sized_state [h][w] -> dim_info manual32 manual64 -> sized_state [h][w]
     val dim_id: i32
     val fid_offset: i32
   }
@@ -252,8 +257,8 @@ module lys: lys with text_content = text_content = {
 
   let grab_mouse = false
 
-  let init (seed: i32) (h: i32) (w: i32): state =
-    let rng = rnge.rng_from_seed [seed]
+  let init (seed: u32) (h: i32) (w: i32): state =
+    let rng = rnge.rng_from_seed [i32.u32 seed]
     let (rng, manual_2d) = f2d.gen_manual rng (#trans 3)
     let (rng, manual_3d) = f3d.gen_manual rng (#trans 3)
     in {height=h, width=w,
@@ -293,29 +298,30 @@ module lys: lys with text_content = text_content = {
     case #dim2 -> f2de.text_content fps s
     case #dim3 -> f3de.text_content fps s
 
-  let text_format = "Dimensions: [%[ |X]] 2D  [%[ |X]] 3D\n"
-                    ++ "Float size:" ++ " [%[ |X]] 32 bits" ++ (if settings.enable_f64 then "  [%[ |X]] 64 bits" else "%[]") ++ "\n"
-                    ++ "Fractal: %["
-                    ++ (loop s = "" for i < f2d.fractal_choices do
-                          s ++ "|" ++ f2d.fractal_name (f2d.fractal_from_id i))[1:]
-                    ++ (loop s = "" for i < f3d.fractal_choices do
-                          s ++ "|" ++ f3d.fractal_name (f3d.fractal_from_id i))
-                    ++ "]\n"
-                    ++ "Branch factor: %d\n"
-                    ++ "Iterations: %d\n"
-                    ++ "Particles (without culling): %d^%d ≈ %.03le\n"
-                    ++ "Particles (with culling): %d\n"
-                    ++ "Viewport: center (%.03le, %.03le); zoom %.03le\n"
-                    ++ "Auto mode: %[disabled|enabled]\n"
-                    ++ "FPS: %d\n"
-                    ++ "\n"
-                    ++ "[%[ |X]] cullbranches rendering:\n"
-                    ++ "Rotated square radius: %.03f\n"
-                    ++ "\n"
-                    ++ "[%[ |X]] scalarloop rendering:\n"
-                    ++ "%[        |Current:] Iterations (2 transforms): %d (max: %d)\n"
-                    ++ "%[        |Current:] Iterations (3 transforms): %d (max: %d)\n"
-                    ++ "%[        |Current:] Iterations (4 transforms): %d (max: %d)"
+  let text_format () =
+    "Dimensions: [%[ |X]] 2D  [%[ |X]] 3D\n"
+    ++ "Float size:" ++ " [%[ |X]] 32 bits" ++ (if settings.enable_f64 then "  [%[ |X]] 64 bits" else "%[]") ++ "\n"
+    ++ "Fractal: %["
+    ++ (loop s = "" for i < f2d.fractal_choices do
+          s ++ "|" ++ f2d.fractal_name (f2d.fractal_from_id i))[1:]
+    ++ (loop s = "" for i < f3d.fractal_choices do
+          s ++ "|" ++ f3d.fractal_name (f3d.fractal_from_id i))
+    ++ "]\n"
+    ++ "Branch factor: %d\n"
+    ++ "Iterations: %d\n"
+    ++ "Particles (without culling): %d^%d ≈ %.03le\n"
+    ++ "Particles (with culling): %d\n"
+    ++ "Viewport: center (%.03le, %.03le); zoom %.03le\n"
+    ++ "Auto mode: %[disabled|enabled]\n"
+    ++ "FPS: %d\n"
+    ++ "\n"
+    ++ "[%[ |X]] cullbranches rendering:\n"
+    ++ "Rotated square radius: %.03f\n"
+    ++ "\n"
+    ++ "[%[ |X]] scalarloop rendering:\n"
+    ++ "%[        |Current:] Iterations (2 transforms): %d (max: %d)\n"
+    ++ "%[        |Current:] Iterations (3 transforms): %d (max: %d)\n"
+    ++ "%[        |Current:] Iterations (4 transforms): %d (max: %d)"
 
   let text_colour = const argb.white
 }
