@@ -38,7 +38,7 @@ module fractal_utils_extended (float: float_extended)
               (all_trans: point -> vec2.vector -> float -> float -> (float, float) -> []point)
               (height: i32) (width: i32) (iterations: i32)
               (vp_zoom: float) (vp_center: vec2.vector)
-              (render_approach: render_approach): float.render_result =
+              (render_approach: render_approach): float.render_result [height][width] =
     let xy_factor = float.from_i32 (i32.min height width)
     let x_offset_base = float.from_i32 (i32.max 0 (width - height)) float./ xy_factor
     let y_offset_base = float.from_i32 (i32.max 0 (height - width)) float./ xy_factor

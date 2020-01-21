@@ -51,7 +51,7 @@ module fractals (float: float_extended) = {
     case 2 -> #swirl
     case _ -> #eof
 
-  let fractal_name (f: fractal): string =
+  let fractal_name (f: fractal): string [] =
     match f
     case #manual -> "random" -- more meaningful user-facing name than "manual"
     case #swirl -> "swirl"
@@ -61,7 +61,7 @@ module fractals (float: float_extended) = {
   let render_fractal (f: fractal) (time: float) (m: manual)
                      (height: i32) (width: i32) (iterations: i32)
                      (vp_zoom: float) (vp_center: vec2.vector)
-                     (render_approach: render_approach): float.render_result =
+                     (render_approach: render_approach): float.render_result [height][width] =
     match f
     case #manual ->
       (match m.n_trans

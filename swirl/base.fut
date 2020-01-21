@@ -14,16 +14,16 @@ type render_approach = #scalarloop | #cullbranches
 module settings_module = import "../settings"
 module settings: settings = settings_module.settings
 
-type render_result_base 't = {n_trans: i32,
-                              n_points: i32,
-                              n_iterations: i32,
-                              rot_square_radius: t,
-                              render: [][]argb.colour}
+type render_result_base [h][w] 't = {n_trans: i32,
+                                     n_points: i32,
+                                     n_iterations: i32,
+                                     rot_square_radius: t,
+                                     render: [h][w]argb.colour}
 
 module type float_extended = {
   include float
 
-  type render_result = render_result_base t
+  type render_result [h][w] = render_result_base [h][w] t
 
   val from_i32: i32 -> t
 
@@ -35,7 +35,7 @@ module mk_float_extended (float: float): float_extended with t = float.t = {
 
   module norm_dist = normal_distribution float rnge
 
-  type render_result = render_result_base t
+  type render_result [h][w] = render_result_base [h][w] t
 
   let from_i32 = f64 <-< r64
 
