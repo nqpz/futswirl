@@ -87,9 +87,9 @@ module lys: lys with text_content = text_content = {
 
     let zoom_at_mouse (zoom_factor: float_dual) (s: state): state =
       let xy_factor = float_dual.i32 (i32.min s.height s.width) float_dual.* s.vp_zoom
-      let xb = float_dual.i32 (s.mouse.1 - s.width / 2)
+      let xb = float_dual.i32 (s.mouse.0 - s.width / 2)
       let xd = xb float_dual./ xy_factor float_dual.- xb float_dual./ (xy_factor float_dual.* zoom_factor)
-      let yb = float_dual.i32 (s.mouse.2 - s.height / 2)
+      let yb = float_dual.i32 (s.mouse.1 - s.height / 2)
       let yd = yb float_dual./ xy_factor float_dual.- yb float_dual./ (xy_factor float_dual.* zoom_factor)
       in s with vp_zoom = s.vp_zoom float_dual.* zoom_factor
            with vp_center.x = s.vp_center.x float_dual.+ xd
@@ -193,8 +193,8 @@ module lys: lys with text_content = text_content = {
         then s with shift_key = false
         else s
       case #mouse {buttons, x, y} ->
-        let x_diff = s.mouse.1 - x
-        let y_diff = s.mouse.2 - y
+        let x_diff = s.mouse.0 - x
+        let y_diff = s.mouse.1 - y
         let s = s with mouse = (x, y)
 
         let xy_factor = float_dual.i32 (i32.min s.height s.width) float_dual.* s.vp_zoom

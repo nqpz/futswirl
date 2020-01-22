@@ -58,14 +58,14 @@ module fractals_wrapper (manual: manual)
                      (render_approach: render_approach): render_result_base [height][width] float_dual =
     match fb
     case #f32 ->
-      let res = b32.render_fractal f (float_dual.to_f32 time) m.1 height width iterations
+      let res = b32.render_fractal f (float_dual.to_f32 time) m.0 height width iterations
                 (float_dual.to_f32 vp_zoom) {x=float_dual.to_f32 vp_center.x, y=float_dual.to_f32 vp_center.y}
                 render_approach
       in {n_trans=res.n_trans, n_points=res.n_points, n_iterations=res.n_iterations,
           rot_square_radius={f32=res.rot_square_radius, f64=f64.f32 res.rot_square_radius}, render=res.render}
     case #f64 ->
       if settings.enable_f64
-      then let res = b64.render_fractal f (float_dual.to_f64 time) m.2 height width iterations
+      then let res = b64.render_fractal f (float_dual.to_f64 time) m.1 height width iterations
                      (float_dual.to_f64 vp_zoom) {x=float_dual.to_f64 vp_center.x, y=float_dual.to_f64 vp_center.y}
                      render_approach
            in {n_trans=res.n_trans, n_points=res.n_points, n_iterations=res.n_iterations,
