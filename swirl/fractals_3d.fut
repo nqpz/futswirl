@@ -8,7 +8,7 @@ module fractals (float: float_extended) = {
   -- Typical patterns.
   let mt (t: float) (a: (float, float, float)) (b: (float, float, float))
          (c: (float, float, float)) (d: float): point -> point =
-    rotate (a.1 float.+ b.1 float.* t, a.2 float.+ b.2 float.* t, a.3 float.+ b.3 float.* t) >-> translate c >-> scale d
+    rotate (a.0 float.+ b.0 float.* t, a.1 float.+ b.1 float.* t, a.2 float.+ b.2 float.* t) >-> translate c >-> scale d
 
   let manual2 t a0 b0 c0 d0 a1 b1 c1 d1 =
     fractal2 (mt t a0 b0 c0 d0) (mt t a1 b1 c1 d1)

@@ -85,7 +85,7 @@ module fractal_utils_extended (float: float_extended)
                 < settings.cullbranches_bytes
           do let points = flatten (map (\p -> all_trans p vp_center cur_scale vp_zoom
                                                         (x_offset, y_offset)) points)
-             let points = filter (\p -> !(float.isinf (xypos p vp_zoom).1)) points
+             let points = filter (\p -> !(float.isinf (xypos p vp_zoom).0)) points
              in (points, float.(cur_scale * total_scale), step + 1)
         in (length points, iterations', make_pixels points)
 
@@ -99,7 +99,7 @@ module fractal_utils_extended (float: float_extended)
                      ((x_offset, y_offset): (float, float))
                      (rot_square_radius: float) (q: point): bool =
     let qp = xypos q vp_zoom
-    let r = {x=qp.1, y=qp.2}
+    let r = {x=qp.0, y=qp.1}
     let k_base = float.(f64 0.5 + (rot_square_radius / f64 2) * cur_scale)
     let kx = float.(k_base + x_offset)
     let ky = float.(k_base + y_offset)

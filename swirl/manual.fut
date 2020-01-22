@@ -51,16 +51,16 @@ module manual_2d = {
   let manual_from_f64 (m: manual_base f64): manual_base f32 =
     let c = f32.f64
     in {rotate0=c m.rotate0, tfac0=c m.tfac0,
-        translate0=(c m.translate0.1, c m.translate0.2),
+        translate0=(c m.translate0.0, c m.translate0.1),
         scale0=c m.scale0,
         rotate1=c m.rotate1, tfac1=c m.tfac1,
-        translate1=(c m.translate1.1, c m.translate1.2),
+        translate1=(c m.translate1.0, c m.translate1.1),
         scale1=c m.scale1,
         rotate2=c m.rotate2, tfac2=c m.tfac2,
-        translate2=(c m.translate2.1, c m.translate2.2),
+        translate2=(c m.translate2.0, c m.translate2.1),
         scale2=c m.scale2,
         rotate3=c m.rotate3, tfac3=c m.tfac3,
-        translate3=(c m.translate3.1, c m.translate3.2),
+        translate3=(c m.translate3.0, c m.translate3.1),
         scale3=c m.scale3,
         n_trans=m.n_trans}
 }
@@ -130,21 +130,21 @@ module manual_3d = {
 
   let manual_from_f64 (m: manual_base f64): manual_base f32 =
     let c = f32.f64
-    in {rotate0=(c m.rotate0.1, c m.rotate0.2, c m.rotate0.3),
-        tfac0=(c m.tfac0.1, c m.tfac0.2, c m.tfac0.3),
-        translate0=(c m.translate0.1, c m.translate0.2, c m.translate0.3),
+    in {rotate0=(c m.rotate0.0, c m.rotate0.1, c m.rotate0.2),
+        tfac0=(c m.tfac0.0, c m.tfac0.1, c m.tfac0.2),
+        translate0=(c m.translate0.0, c m.translate0.1, c m.translate0.2),
         scale0=c m.scale0,
-        rotate1=(c m.rotate1.1, c m.rotate1.2, c m.rotate1.3),
-        tfac1=(c m.tfac1.1, c m.tfac1.2, c m.tfac1.3),
-        translate1=(c m.translate1.1, c m.translate1.2, c m.translate1.3),
+        rotate1=(c m.rotate1.0, c m.rotate1.1, c m.rotate1.2),
+        tfac1=(c m.tfac1.0, c m.tfac1.1, c m.tfac1.2),
+        translate1=(c m.translate1.0, c m.translate1.1, c m.translate1.2),
         scale1=c m.scale1,
-        rotate2=(c m.rotate2.1, c m.rotate2.2, c m.rotate2.3),
-        tfac2=(c m.tfac2.1, c m.tfac2.2, c m.tfac2.3),
-        translate2=(c m.translate2.1, c m.translate2.2, c m.translate2.3),
+        rotate2=(c m.rotate2.0, c m.rotate2.1, c m.rotate2.2),
+        tfac2=(c m.tfac2.0, c m.tfac2.1, c m.tfac2.2),
+        translate2=(c m.translate2.0, c m.translate2.1, c m.translate2.2),
         scale2=c m.scale2,
-        rotate3=(c m.rotate3.1, c m.rotate3.2, c m.rotate3.3),
-        tfac3=(c m.tfac3.1, c m.tfac3.2, c m.tfac3.3),
-        translate3=(c m.translate3.1, c m.translate3.2, c m.translate3.3),
+        rotate3=(c m.rotate3.0, c m.rotate3.1, c m.rotate3.2),
+        tfac3=(c m.tfac3.0, c m.tfac3.1, c m.tfac3.2),
+        translate3=(c m.translate3.0, c m.translate3.1, c m.translate3.2),
         scale3=c m.scale3,
         n_trans=m.n_trans}
 }
