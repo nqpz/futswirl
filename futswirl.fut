@@ -31,7 +31,7 @@ module lys: lys with text_content = text_content = {
      dim2_info: dim_info f2d.manual32 f2d.manual64,
      dim3_info: dim_info f3d.manual32 f3d.manual64}
 
-  type state = sized_state [][]
+  type~ state = sized_state [][]
 
   module type lys_fractals_base = {
     type fractal
