@@ -35,7 +35,7 @@ module fractal_utils_extended (float: float_extended)
 
   let fractal (n_trans: i32) (total_scale: float) (rot_square_radius: float)
               (pick_trans: i32 -> i32 -> point -> point)
-              (all_trans: point -> vec2.vector -> float -> float -> (float, float) -> []point)
+              (all_trans: point -> vec2.vector -> float -> float -> (float, float) -> [n_trans]point)
               (height: i32) (width: i32) (iterations: i32)
               (vp_zoom: float) (vp_center: vec2.vector)
               (render_approach: render_approach): float.render_result [height][width] =
