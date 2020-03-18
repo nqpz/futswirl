@@ -14,7 +14,7 @@ module type float_with_to_conv = {
   val to_f32: t -> f32
 }
 
-module float_dual: (float_with_to_conv with t = float_dual with int_t = uint_dual) = {
+module float_dual = {
   type t = float_dual
   type int_t = uint_dual
 
