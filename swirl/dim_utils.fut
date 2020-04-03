@@ -72,7 +72,7 @@ module fractal_utils_extended (float: float_extended)
           let (p, _) = loop (p, k) = (start_point vp_zoom,
                                       n_trans**iterations) for _step < iterations do
                        let k' = k / n_trans
-                       in (pick_trans (i % k) k' p, k')
+                       in (pick_trans (i %% i32.max 1 k) k' p, k')
           in p
         let n_points = n_trans**iterations
         let points = map particle_point (0..<n_points)
