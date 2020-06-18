@@ -74,5 +74,5 @@ Define your fractals in `swirl/fractals_2d.fut` and `swirl/fractals_3d.fut`.
 ## License
 
 futswirl is free software under the terms of the GNU General Public
-License version 3 (or any later version).  Copyright (C) 2019 Niels
-G. W. Serup.
+License version 3 (or any later version).  Copyright (C) 2019, 2020
+Niels G. W. Serup.
