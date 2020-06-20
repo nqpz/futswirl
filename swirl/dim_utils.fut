@@ -55,14 +55,14 @@ module fractal_utils_extended (float: float_extended)
                       in if x < 0 || x >= width || y < 0 || y >= height
                          then -1
                          else y * width + x) points
-      let frame = replicate (height * width) 0
-      let vs = map (const 1) points
-      let frame' = reduce_by_index frame (+) 0 is vs
-      let max_depth = reduce i32.max 0 frame'
+      let frame = replicate (height * width) 0u32
+      let vs = map (const 1u32) points
+      let frame' = reduce_by_index frame (+) 0u32 is vs
+      let max_depth = reduce u32.max 0u32 frame'
       let frame'' = map (\depth ->
                            let (r, g, b) = hsl_to_rgb
-                                           (0.5 + r32 depth / r32 max_depth) 0.5 0.5
-                           in i32.sgn depth * argb_colour.from_rgba r g b 1.0) frame'
+                                           (0.5 + f32.u32 depth / f32.u32 max_depth) 0.5 0.5
+                           in u32.sgn depth * argb_colour.from_rgba r g b 1.0) frame'
       in frame''
 
     let (n_points, iterations', frame) =
