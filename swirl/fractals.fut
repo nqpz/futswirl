@@ -18,7 +18,7 @@ module type fractals_base = {
   val fractal_from_id: i32 -> fractal
   val fractal_name: fractal -> string []
   val render_fractal: fractal -> float -> manual ->
-                      (h: i32) -> (w: i32) -> i32 ->
+                      (h: i64) -> (w: i64) -> i32 ->
                       float -> vec2_vector -> render_approach ->
                       render_result_base [h][w] float
 }
@@ -53,7 +53,7 @@ module fractals_wrapper (manual: manual)
     in (rng, (manual32, manual64))
 
   let render_fractal (fb: float_bits) (f: fractal) (time: float_dual) (m: manual)
-                     (height: i32) (width: i32) (iterations: i32)
+                     (height: i64) (width: i64) (iterations: i32)
                      (vp_zoom: float_dual) (vp_center: vec2_float_dual.vector)
                      (render_approach: render_approach): render_result_base [height][width] float_dual =
     match fb

@@ -20,7 +20,7 @@ module lys: lys with text_content = text_content = {
 
   -- A hack because we need this type in a module type as well.
   type sized_state [h][w] =
-    {height: i32, width: i32, rng: rng,
+    {height: i64, width: i64, rng: rng,
      iterations2: i32, iterations3: i32, iterations4: i32,
      time: float_dual, vp_zoom: float_dual, vp_center: vec2_float_dual.vector,
      render: render_result_base [h][w] float_dual, render_approach: render_approach,
@@ -44,7 +44,7 @@ module lys: lys with text_content = text_content = {
     val fractal_from_id: i32 -> fractal
     val fractal_name: fractal -> string []
     val render_fractal: float_bits -> fractal -> float_dual -> manual ->
-                        (h: i32) -> (w: i32) -> i32 ->
+                        (h: i64) -> (w: i64) -> i32 ->
                         float_dual -> vec2_float_dual.vector -> render_approach ->
                         render_result_base [h][w] float_dual
 
@@ -86,10 +86,10 @@ module lys: lys with text_content = text_content = {
       else s with iterations4 = iter
 
     let zoom_at_mouse (zoom_factor: float_dual) (s: state): state =
-      let xy_factor = float_dual.i32 (i32.min s.height s.width) float_dual.* s.vp_zoom
-      let xb = float_dual.i32 (s.mouse.0 - s.width / 2)
+      let xy_factor = float_dual.i64 (i64.min s.height s.width) float_dual.* s.vp_zoom
+      let xb = float_dual.i64 (i64.i32 s.mouse.0 - s.width / 2)
       let xd = xb float_dual./ xy_factor float_dual.- xb float_dual./ (xy_factor float_dual.* zoom_factor)
-      let yb = float_dual.i32 (s.mouse.1 - s.height / 2)
+      let yb = float_dual.i64 (i64.i32 s.mouse.1 - s.height / 2)
       let yd = yb float_dual./ xy_factor float_dual.- yb float_dual./ (xy_factor float_dual.* zoom_factor)
       in s with vp_zoom = s.vp_zoom float_dual.* zoom_factor
            with vp_center.x = s.vp_center.x float_dual.+ xd
@@ -197,7 +197,7 @@ module lys: lys with text_content = text_content = {
         let y_diff = s.mouse.1 - y
         let s = s with mouse = (x, y)
 
-        let xy_factor = float_dual.i32 (i32.min s.height s.width) float_dual.* s.vp_zoom
+        let xy_factor = float_dual.i64 (i64.min s.height s.width) float_dual.* s.vp_zoom
 
         let s = if buttons & 1 == 1 || buttons & 4 == 4
                 then s with vp_center.x = s.vp_center.x float_dual.+ float_dual.i32 x_diff float_dual./ xy_factor
@@ -257,7 +257,7 @@ module lys: lys with text_content = text_content = {
 
   let grab_mouse = false
 
-  let init (seed: u32) (h: i32) (w: i32): state =
+  let init (seed: u32) (h: i64) (w: i64): state =
     let rng = rnge.rng_from_seed [i32.u32 seed]
     let (rng, manual_2d) = f2d.gen_manual rng (#trans 3)
     let (rng, manual_3d) = f3d.gen_manual rng (#trans 3)
