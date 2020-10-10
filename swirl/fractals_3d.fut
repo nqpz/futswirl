@@ -59,7 +59,7 @@ module fractals (float: float_extended) = {
     case #eof -> ""
 
   let render_fractal (f: fractal) (time: float) (m: manual)
-                     (height: i32) (width: i32) (iterations: i32)
+                     (height: i64) (width: i64) (iterations: i32)
                      (vp_zoom: float) (vp_center: vec2.vector)
                      (render_approach: render_approach): float.render_result [height][width] =
     match f

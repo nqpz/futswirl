@@ -33,24 +33,24 @@ module fractal_utils_extended (float: float_extended)
   module vec3 = mk_vspace_3d float
   open utils
 
-  let fractal (n_trans: i32) (total_scale: float) (rot_square_radius: float)
+  let fractal (n_trans: i64) (total_scale: float) (rot_square_radius: float)
               (pick_trans: i32 -> i32 -> point -> point)
               (all_trans: point -> vec2.vector -> float -> float -> (float, float) -> [n_trans]point)
-              (height: i32) (width: i32) (iterations: i32)
+              (height: i64) (width: i64) (iterations: i32)
               (vp_zoom: float) (vp_center: vec2.vector)
               (render_approach: render_approach): float.render_result [height][width] =
-    let xy_factor = float.from_i32 (i32.min height width)
-    let x_offset_base = float.from_i32 (i32.max 0 (width - height)) float./ xy_factor
-    let y_offset_base = float.from_i32 (i32.max 0 (height - width)) float./ xy_factor
+    let xy_factor = float.i64 (i64.min height width)
+    let x_offset_base = float.i64 (i64.max 0 (width - height)) float./ xy_factor
+    let y_offset_base = float.i64 (i64.max 0 (height - width)) float./ xy_factor
     let x_offset = float.(x_offset_base / f64 2)
     let y_offset = float.(y_offset_base / f64 2)
 
     let make_pixels points =
       let is = map (\p ->
                       let (x0, y0) = xypos p vp_zoom
-                      let x = float.(to_i32 (xy_factor * ((x0 + float.f64 0.5 + x_offset) -
+                      let x = float.(to_i64 (xy_factor * ((x0 + float.f64 0.5 + x_offset) -
                                                           vp_center.x * vp_zoom)))
-                      let y = float.(to_i32 (xy_factor * ((y0 + f64 0.5 + y_offset) -
+                      let y = float.(to_i64 (xy_factor * ((y0 + f64 0.5 + y_offset) -
                                                           vp_center.y * vp_zoom)))
                       in if x < 0 || x >= width || y < 0 || y >= height
                          then -1
@@ -70,26 +70,26 @@ module fractal_utils_extended (float: float_extended)
       case #scalarloop ->
         let particle_point (i: i32): point =
           let (p, _) = loop (p, k) = (start_point vp_zoom,
-                                      n_trans**iterations) for _step < iterations do
-                       let k' = k / n_trans
+                                      i32.i64 n_trans**iterations) for _step < iterations do
+                       let k' = k / i32.i64 n_trans
                        in (pick_trans (i %% i32.max 1 k) k' p, k')
           in p
-        let n_points = n_trans**iterations
+        let n_points = i32.i64 n_trans**iterations
         let points = map particle_point (0..<n_points)
         in (n_points, iterations, make_pixels points)
 
       case #cullbranches ->
         let (points, _, iterations') =
           loop (points, cur_scale, step) = ([start_point vp_zoom], vp_zoom, 0)
-          while i64.i32 (length points) * i64.i32 n_trans * i64.i32 point_bytes
+          while length points * n_trans * i64.i32 point_bytes
                 < settings.cullbranches_bytes
           do let points = flatten (map (\p -> all_trans p vp_center cur_scale vp_zoom
                                                         (x_offset, y_offset)) points)
              let points = filter (\p -> !(float.isinf (xypos p vp_zoom).0)) points
              in (points, float.(cur_scale * total_scale), step + 1)
-        in (length points, iterations', make_pixels points)
+        in (i32.i64 (length points), iterations', make_pixels points)
 
-    in {n_trans=n_trans, n_points=n_points,
+    in {n_trans=i32.i64 n_trans, n_points=n_points,
         n_iterations=iterations',
         rot_square_radius=rot_square_radius,
         render=unflatten height width frame}

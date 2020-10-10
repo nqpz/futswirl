@@ -95,8 +95,7 @@ module float_dual = {
 
   let bool (x: bool) = op1' f32m.bool f64m.bool x
 
-  let from_fraction (x: i32) (y: i32) = op2' f32m.from_fraction f64m.from_fraction x y
-  let to_i32 (x: t) = op1'' f32m.to_i32 f64m.to_i32 x
+  let from_fraction (x: i64) (y: i64) = op2' f32m.from_fraction f64m.from_fraction x y
   let to_i64 (x: t) = op1'' f32m.to_i64 f64m.to_i64 x
   let to_f64 (x: t) = op1'' f32m.to_f64 f64m.to_f64 x
 
