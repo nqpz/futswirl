@@ -1,3 +1,5 @@
+import "../lib/github.com/diku-dk/lys/lys"
+import "../lib/github.com/athas/vector/vspace"
 import "base"
 import "manual"
 import "hsl"

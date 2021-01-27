@@ -1,3 +1,5 @@
+import "../lib/github.com/diku-dk/lys/lys"
+import "base"
 import "dim_utils"
 
 module fractals (float: float_extended) = {

@@ -1,3 +1,4 @@
+import "lib/github.com/diku-dk/lys/lys"
 import "swirl/base"
 import "swirl/manual"
 import "swirl/fractals"

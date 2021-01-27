@@ -1,5 +1,4 @@
 import "../lib/github.com/athas/vector/vspace"
-import "../lib/github.com/athas/matte/colour"
 import "../lib/github.com/diku-dk/cpprandom/random"
 import "../lib/github.com/diku-dk/lys/lys"
 
