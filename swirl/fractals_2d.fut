@@ -30,7 +30,7 @@ module fractals (float: float_extended) = {
 
   let dissolving_sierpinski time =
     fractal3
-    (rotate (float.negate time float./ f 4) >-> translate (f 0, f (-0.25)) >-> scale (f 0.5))
+    (rotate (float.neg time float./ f 4) >-> translate (f 0, f (-0.25)) >-> scale (f 0.5))
     (rotate (time float./ f 4) >-> translate (f (-0.25), f 0.25) >-> scale (f 0.5))
     (rotate (time float./ f 4) >-> translate (f 0.25, f 0.25) >-> scale (f 0.5))
 

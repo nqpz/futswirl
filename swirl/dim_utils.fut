@@ -105,8 +105,8 @@ module fractal_utils_extended (float: float_extended)
     let k_base = float.(f64 0.5 + (rot_square_radius / f64 2) * cur_scale)
     let kx = float.(k_base + x_offset)
     let ky = float.(k_base + y_offset)
-    in float.(r.x >= negate kx + c.x * vp_zoom && r.x < kx + c.x * vp_zoom
-              && r.y >= negate ky + c.y * vp_zoom && r.y < ky + c.y * vp_zoom)
+    in float.(r.x >= neg kx + c.x * vp_zoom && r.x < kx + c.x * vp_zoom
+              && r.y >= neg ky + c.y * vp_zoom && r.y < ky + c.y * vp_zoom)
 
   let branch_visible' c cur_scale vp_zoom off rr q: point =
     if branch_visible c cur_scale vp_zoom off rr q

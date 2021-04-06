@@ -31,7 +31,7 @@ module fractals (float: float_extended) = {
 
   let rotating_sierpinski time =
     fractal3
-    (rotate (f 0, (float.negate (time float./ f 3)), f 0) >-> translate (f 0, f (-0.25), f 0) >-> scale (f 0.5))
+    (rotate (f 0, (float.neg (time float./ f 3)), f 0) >-> translate (f 0, f (-0.25), f 0) >-> scale (f 0.5))
     (rotate (f 0, (time float./ f 3), f 0) >-> translate (f (-0.25), f (0.25), f (-0.1)) >-> scale (f 0.5))
     (rotate (f 0, (time float./ f 3), f 0) >-> translate (f 0.25, f 0.25, f 0.1) >-> scale (f 0.5))
 

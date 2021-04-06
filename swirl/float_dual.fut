@@ -106,7 +106,7 @@ module float_dual = {
   let (>=) = op2'' (f32m.>=) (f64m.>=)
   let (!=) = op2'' (f32m.!=) (f64m.!=)
 
-  let negate = op1 f32m.negate f64m.negate
+  let neg = op1 f32m.neg f64m.neg
   let max = op2 f32m.max f64m.max
   let min = op2 f32m.min f64m.min
 
@@ -151,7 +151,7 @@ module float_dual = {
   let nan = op0 f32m.nan f64m.nan
 
   let highest = inf
-  let lowest = negate inf
+  let lowest = neg inf
 
   let pi = op0 f32m.pi f64m.pi
   let e = op0 f32m.e f64m.e

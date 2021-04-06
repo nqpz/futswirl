@@ -42,7 +42,7 @@ module mk_float_extended (float: float): float_extended with t = float.t = {
   let gen_float (rng: rng): (rng, t) =
     let (rng, x) = norm_dist.rand {mean=float.f64 0, stddev=float.f64 0.1} rng
     let k = float.f64 0.5
-    let x = float.(if x < negate k then negate k
+    let x = float.(if x < neg k then neg k
                    else if x > k then k
                    else x)
     in (rng, x)
