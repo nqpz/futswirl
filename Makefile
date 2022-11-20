@@ -23,4 +23,4 @@ settings.fut: settings_template.fut
 	cp settings_template.fut settings.fut
 
 settings_typecheck:
-	@futhark dev settings.fut || echo "NOTE: futswirl has been updated; please edit settings.fut according to the compiler output, or replace it with the contents of settings_template.fut."
+	@futhark dev settings.fut > /dev/null || echo "NOTE: futswirl has been updated; please edit settings.fut according to the compiler output, or replace it with the contents of settings_template.fut."
