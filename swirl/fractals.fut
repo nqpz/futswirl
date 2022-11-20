@@ -36,24 +36,24 @@ module fractals_wrapper (manual: manual)
                               with fractal = b32.fractal) = {
 
   type fractal = b32.fractal
-  let fractal_from_id = b32.fractal_from_id
-  let fractal_name = b32.fractal_name
+  def fractal_from_id = b32.fractal_from_id
+  def fractal_name = b32.fractal_name
 
   type manual_base 't = manual.manual_base t
   type manual32 = manual_base f32
   type manual64 = manual_base f64
   type manual = (manual32, manual64)
 
-  let fractal_choices = loop i = 0i32
+  def fractal_choices = loop i = 0i32
                         while ! (b32.fractals_end (b32.fractal_from_id i))
                         do i + 1
 
-  let gen_manual (rng: rng) (c: gen_manual_constraint): (rng, manual) =
+  def gen_manual (rng: rng) (c: gen_manual_constraint): (rng, manual) =
     let (rng, manual64) = manual.gen_manual rng c
     let manual32 = manual.manual_from_f64 manual64
     in (rng, (manual32, manual64))
 
-  let render_fractal (fb: float_bits) (f: fractal) (time: float_dual) (m: manual)
+  def render_fractal (fb: float_bits) (f: fractal) (time: float_dual) (m: manual)
                      (height: i64) (width: i64) (iterations: i32)
                      (vp_zoom: float_dual) (vp_center: vec2_float_dual.vector)
                      (render_approach: render_approach): render_result_base [height][width] float_dual =

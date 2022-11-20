@@ -1,4 +1,4 @@
-let hsl_to_rgb (h: f32) (s: f32) (l: f32): (f32, f32, f32) =
+def hsl_to_rgb (h: f32) (s: f32) (l: f32): (f32, f32, f32) =
   let hsl_value (n1: f32) (n2: f32) (hue: f32): f32 =
     let hue' = if hue > 6.0
                then hue - 6.0

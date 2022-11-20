@@ -36,10 +36,10 @@ module mk_float_extended (float: float): float_extended with t = float.t = {
 
   type render_result [h][w] = render_result_base [h][w] t
 
-  let from_i32 = f64 <-< r64
+  def from_i32 = f64 <-< r64
 
   -- | Generate a f32 between -0.5 and +0.5, with most values close to 0.0.
-  let gen_float (rng: rng): (rng, t) =
+  def gen_float (rng: rng): (rng, t) =
     let (rng, x) = norm_dist.rand {mean=float.f64 0, stddev=float.f64 0.1} rng
     let k = float.f64 0.5
     let x = float.(if x < neg k then neg k

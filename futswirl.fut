@@ -58,15 +58,15 @@ module lys: lys with text_content = text_content = {
 
   module fractals_extended (f: lys_fractals_base) = {
     -- | Set the id of the fractal to show.
-    let fractal_id (s: state): i32 =
+    def fractal_id (s: state): i32 =
       (f.dim_info s).fractal_id % f.fractal_choices
 
     -- | Get the id of the fractal to show.
-    let set_fractal_id (s: state) (i: i32): state =
+    def set_fractal_id (s: state) (i: i32): state =
       f.set_dim_info s (f.dim_info s with fractal_id = i)
 
     -- | Get the number of iterations for the current fractal.
-    let scalarloop_iterations (s: state): i32 =
+    def scalarloop_iterations (s: state): i32 =
       if s.render.n_trans == 2
       then s.iterations2
       else if s.render.n_trans == 3
@@ -77,16 +77,16 @@ module lys: lys with text_content = text_content = {
     -- around this, but in practice having that many particles is very slow, so
     -- we we use this check for now.  Only applies to the scalarloop render
     -- approach.
-    let max_iterations (n_trans: i32): i32 =
+    def max_iterations (n_trans: i32): i32 =
       t32 (f32.log (2**31 - 4096) / f32.log (r32 n_trans))
 
     -- | Set the number of iterations for the current fractal.
-    let set_scalarloop_iterations (s: state) (iter: i32): state =
+    def set_scalarloop_iterations (s: state) (iter: i32): state =
       if s.render.n_trans == 2 then s with iterations2 = iter
       else if s.render.n_trans == 3 then s with iterations3 = iter
       else s with iterations4 = iter
 
-    let zoom_at_mouse (zoom_factor: float_dual) (s: state): state =
+    def zoom_at_mouse (zoom_factor: float_dual) (s: state): state =
       let xy_factor = float_dual.i64 (i64.min s.height s.width) float_dual.* s.vp_zoom
       let xb = float_dual.i64 (i64.i32 s.mouse.0 - s.width / 2)
       let xd = xb float_dual./ xy_factor float_dual.- xb float_dual./ (xy_factor float_dual.* zoom_factor)
@@ -96,7 +96,7 @@ module lys: lys with text_content = text_content = {
            with vp_center.x = s.vp_center.x float_dual.+ xd
            with vp_center.y = s.vp_center.y float_dual.+ yd
 
-    let event (e: event) (s: state): state =
+    def event (e: event) (s: state): state =
       match e
       case #step td ->
         let (rng, manual, cur_start) =
@@ -215,10 +215,10 @@ module lys: lys with text_content = text_content = {
              in zoom_at_mouse zoom_factor s
       case _ -> s
 
-    let render (s: state) =
+    def render (s: state) =
       s.render.render
 
-    let text_content (fps: f32) (s: state): text_content =
+    def text_content (fps: f32) (s: state): text_content =
       let n_trans = s.render.n_trans
       in (i32.bool (f.dim_id == 0), i32.bool (f.dim_id == 1),
           i32.bool (s.float_bits == #f32), i32.bool (s.float_bits == #f64),
@@ -240,25 +240,25 @@ module lys: lys with text_content = text_content = {
 
   module f2de = fractals_extended {
     open f2d
-    let dim_id = 0i32
-    let fid_offset = 0i32
-    let dim_info (s: state): dim_info manual32 manual64 = s.dim2_info
-    let set_dim_info (s: state) (d: dim_info manual32 manual64): state =
+    def dim_id = 0i32
+    def fid_offset = 0i32
+    def dim_info (s: state): dim_info manual32 manual64 = s.dim2_info
+    def set_dim_info (s: state) (d: dim_info manual32 manual64): state =
       s with dim2_info = d
   }
 
   module f3de = fractals_extended {
     open f3d
-    let dim_id = 1i32
-    let fid_offset = f2d.fractal_choices
-    let dim_info (s: state): dim_info manual32 manual64 = s.dim3_info
-    let set_dim_info (s: state) (d: dim_info manual32 manual64): state =
+    def dim_id = 1i32
+    def fid_offset = f2d.fractal_choices
+    def dim_info (s: state): dim_info manual32 manual64 = s.dim3_info
+    def set_dim_info (s: state) (d: dim_info manual32 manual64): state =
       s with dim3_info = d
   }
 
-  let grab_mouse = false
+  def grab_mouse = false
 
-  let init (seed: u32) (h: i64) (w: i64): state =
+  def init (seed: u32) (h: i64) (w: i64): state =
     let rng = rnge.rng_from_seed [i32.u32 seed]
     let (rng, manual_2d) = f2d.gen_manual rng (#trans 3)
     let (rng, manual_3d) = f3d.gen_manual rng (#trans 3)
@@ -281,25 +281,25 @@ module lys: lys with text_content = text_content = {
         dim3_info={auto_mode=false, cur_start=fdc 0,
                    fractal_id=0, manual=manual_3d}}
 
-  let resize h w (s: state) =
+  def resize h w (s: state) =
     s with height = h with width = w
 
-  let event (e: event) (s: state): state =
+  def event (e: event) (s: state): state =
     match s.dim
     case #dim2 -> f2de.event e s
     case #dim3 -> f3de.event e s
 
-  let render (s: state) =
+  def render (s: state) =
     match s.dim
     case #dim2 -> f2de.render s
     case #dim3 -> f3de.render s
 
-  let text_content (fps: f32) (s: state): text_content =
+  def text_content (fps: f32) (s: state): text_content =
     match s.dim
     case #dim2 -> f2de.text_content fps s
     case #dim3 -> f3de.text_content fps s
 
-  let text_format () =
+  def text_format () =
     "Dimensions: [%[ |X]] 2D  [%[ |X]] 3D\n"
     ++ "Float size:" ++ " [%[ |X]] 32 bits" ++ (if settings.enable_f64 then "  [%[ |X]] 64 bits" else "%[]") ++ "\n"
     ++ "Fractal: %["
@@ -324,5 +324,5 @@ module lys: lys with text_content = text_content = {
     ++ "%[        |Current:] Iterations (3 transforms): %d (max: %d)\n"
     ++ "%[        |Current:] Iterations (4 transforms): %d (max: %d)"
 
-  let text_colour = const argb.white
+  def text_colour = const argb.white
 }

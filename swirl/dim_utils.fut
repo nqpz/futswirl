@@ -35,7 +35,7 @@ module fractal_utils_extended (float: float_extended)
   module vec3 = mk_vspace_3d float
   open utils
 
-  let fractal (n_trans: i64) (total_scale: float) (rot_square_radius: float)
+  def fractal (n_trans: i64) (total_scale: float) (rot_square_radius: float)
               (pick_trans: i32 -> i32 -> point -> point)
               (all_trans: point -> vec2.vector -> float -> float -> (float, float) -> [n_trans]point)
               (height: i64) (width: i64) (iterations: i32)
@@ -97,7 +97,7 @@ module fractal_utils_extended (float: float_extended)
         render=unflatten height width frame}
 
   -- Pretty conservative.
-  let branch_visible (c: vec2.vector) (cur_scale: float) (vp_zoom: float)
+  def branch_visible (c: vec2.vector) (cur_scale: float) (vp_zoom: float)
                      ((x_offset, y_offset): (float, float))
                      (rot_square_radius: float) (q: point): bool =
     let qp = xypos q vp_zoom
@@ -108,18 +108,18 @@ module fractal_utils_extended (float: float_extended)
     in float.(r.x >= neg kx + c.x * vp_zoom && r.x < kx + c.x * vp_zoom
               && r.y >= neg ky + c.y * vp_zoom && r.y < ky + c.y * vp_zoom)
 
-  let branch_visible' c cur_scale vp_zoom off rr q: point =
+  def branch_visible' c cur_scale vp_zoom off rr q: point =
     if branch_visible c cur_scale vp_zoom off rr q
     then q
     else set_pos_x q float.inf
 
-  let rot_square_radius (max_translation: float) (total_scale: float): float =
+  def rot_square_radius (max_translation: float) (total_scale: float): float =
     if float.(total_scale < f64 1)
     then let square_radius = float.(max_translation / (f64 1 - total_scale)) -- geometric series
          in float.(sqrt (f64 2 * (square_radius * f64 2)**f64 2) / f64 2)
     else float.inf -- really should not happen
 
-  let fractal2 trans1 trans2 =
+  def fractal2 trans1 trans2 =
     let ((mt1, ts1), (mt2, ts2)) =
       (unit_eval trans1, unit_eval trans2)
     let (max_translation, total_scale) =
@@ -133,7 +133,7 @@ module fractal_utils_extended (float: float_extended)
                   let ensure q = branch_visible' c cur_scale vp_zoom off rr q
                   in [ensure (trans1 p), ensure (trans2 p)])
 
-  let fractal3 trans1 trans2 trans3 =
+  def fractal3 trans1 trans2 trans3 =
     let ((mt1, ts1), (mt2, ts2), (mt3, ts3)) =
       (unit_eval trans1, unit_eval trans2, unit_eval trans3)
     let (max_translation, total_scale) =
@@ -148,7 +148,7 @@ module fractal_utils_extended (float: float_extended)
                   let ensure q = branch_visible' c cur_scale vp_zoom off rr q
                   in [ensure (trans1 p), ensure (trans2 p), ensure (trans3 p)])
 
-  let fractal4 trans1 trans2 trans3 trans4 =
+  def fractal4 trans1 trans2 trans3 trans4 =
     let ((mt1, ts1), (mt2, ts2), (mt3, ts3), (mt4, ts4)) =
       (unit_eval trans1, unit_eval trans2,
        unit_eval trans3, unit_eval trans4)
@@ -175,29 +175,29 @@ module fractal_utils_2d_base (float: float_extended) = {
 
   type point = {pos: vec2.vector, scale: float, rotate: float}
 
-  let point_bytes = 4i32 * 4
+  def point_bytes = 4i32 * 4
 
-  let scale (s: float) (p: point): point =
+  def scale (s: float) (p: point): point =
     p with scale = float.(p.scale * s)
 
   type rotate_t = float
-  let rotate (rotd: rotate_t) (p: point): point =
+  def rotate (rotd: rotate_t) (p: point): point =
     p with rotate = float.(p.rotate + rotd)
 
   type translate_t = (float, float)
-  let translate ((xd, yd): translate_t) (p: point): point =
+  def translate ((xd, yd): translate_t) (p: point): point =
     let rot {x, y} = float.({x=x * cos p.rotate - y * sin p.rotate,
                              y=y * cos p.rotate + x * sin p.rotate})
     in p with pos = vec2.(p.pos + rot (scale p.scale {x=xd, y=yd}))
 
-  let start_point (s: float): point =
+  def start_point (s: float): point =
     float.({pos={x=f64 0, y=f64 0}, scale=s, rotate=f64 0})
 
-  let xypos (p: point) _: (float, float) = (p.pos.x, p.pos.y)
+  def xypos (p: point) _: (float, float) = (p.pos.x, p.pos.y)
 
-  let set_pos_x (p: point) (x: float): point = p with pos.x = x
+  def set_pos_x (p: point) (x: float): point = p with pos.x = x
 
-  let unit_eval (trans: point -> point): (float, float) =
+  def unit_eval (trans: point -> point): (float, float) =
     let p = trans (start_point (float.f64 1))
     let (x, y) = (p.pos.x, p.pos.y)
     in (float.max (float.abs x) (float.abs y), p.scale)
@@ -213,17 +213,17 @@ module fractal_utils_3d_base (float: float_extended) = {
 
   type point = {pos: vec3.vector, scale: float, rotate: vec3.vector}
 
-  let point_bytes = 7i32 * 4
+  def point_bytes = 7i32 * 4
 
-  let scale (s: float) (p: point): point =
+  def scale (s: float) (p: point): point =
     p with scale = float.(p.scale * s)
 
   type rotate_t = (float, float, float)
-  let rotate ((xd, yd, zd): rotate_t) (p: point): point =
+  def rotate ((xd, yd, zd): rotate_t) (p: point): point =
     p with rotate = p.rotate vec3.+ {x=xd, y=yd, z=zd}
 
   type translate_t = (float, float, float)
-  let translate ((xd, yd, zd): translate_t) (p: point): point =
+  def translate ((xd, yd, zd): translate_t) (p: point): point =
     let {x=ax, y=ay, z=az} = p.rotate
     let rot {x=x0, y=y0, z=z0} =
       let (sin_x, cos_x) = (float.sin ax, float.cos ax)
@@ -246,10 +246,10 @@ module fractal_utils_3d_base (float: float_extended) = {
       in {x=x3, y=y3, z=z3}
     in p with pos = vec3.(p.pos + rot (scale p.scale {x=xd, y=yd, z=zd}))
 
-  let start_point (s: float): point = float.({pos={x=f64 0, y=f64 0, z=f64 0.5}, scale=s,
+  def start_point (s: float): point = float.({pos={x=f64 0, y=f64 0, z=f64 0.5}, scale=s,
                                               rotate={x=f64 0, y=f64 0, z=f64 0}})
 
-  let xypos (p: point) (vp_zoom: float): (float, float) =
+  def xypos (p: point) (vp_zoom: float): (float, float) =
     let {x, y, z} = p.pos
     let z' = float.(z / vp_zoom)
     let z_ratio = float.(if z' >= f64 0
@@ -259,9 +259,9 @@ module fractal_utils_3d_base (float: float_extended) = {
     let y_projected = float.(y / z_ratio)
     in (x_projected, y_projected)
 
-  let set_pos_x (p: point) (x: float): point = p with pos.x = x
+  def set_pos_x (p: point) (x: float): point = p with pos.x = x
 
-  let unit_eval (trans: point -> point): (float, float) =
+  def unit_eval (trans: point -> point): (float, float) =
     let p = trans (start_point (float.f64 1))
     let (x, y, z) = (p.pos.x, p.pos.y, p.pos.z)
     in (float.(max (max (abs x) (abs y)) (abs z)), p.scale)

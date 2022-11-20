@@ -6,7 +6,7 @@ module type manual = {
   val manual_from_f64: manual_base f64 -> manual_base f32
 }
 
-let gen_manual_trans (rng: rng): (rng, i32) =
+def gen_manual_trans (rng: rng): (rng, i32) =
   let (rng, t) = f32dist.rand (0, 1) rng
   in (rng, if t < 0.1 then 2
            else if t < 0.6 then 3
@@ -22,7 +22,7 @@ module manual_2d = {
       n_trans: #trans2 | #trans3 | #trans4
   }
 
-  let gen_manual (rng: rng) (c: gen_manual_constraint): (rng, manual_base f64) =
+  def gen_manual (rng: rng) (c: gen_manual_constraint): (rng, manual_base f64) =
     let gen_one rng =
       let (rng, rotate) = f64e.gen_float rng
       let (rng, tfac) = f64e.gen_float rng
@@ -48,7 +48,7 @@ module manual_2d = {
               rotate3, tfac3, translate3=(translatex3, translatey3), scale3,
               n_trans=n_trans})
 
-  let manual_from_f64 (m: manual_base f64): manual_base f32 =
+  def manual_from_f64 (m: manual_base f64): manual_base f32 =
     let c = f32.f64
     in {rotate0=c m.rotate0, tfac0=c m.tfac0,
         translate0=(c m.translate0.0, c m.translate0.1),
@@ -75,7 +75,7 @@ module manual_3d = {
       n_trans: #trans2 | #trans3 | #trans4
   }
 
-  let gen_manual (rng: rng) (c: gen_manual_constraint): (rng, manual_base f64) =
+  def gen_manual (rng: rng) (c: gen_manual_constraint): (rng, manual_base f64) =
     let gen_one rng =
       let (rng, rotatex) = f64e.gen_float rng
       let (rng, rotatey) = f64e.gen_float rng
@@ -128,7 +128,7 @@ module manual_3d = {
               translate3=(translatex3, translatey3, translatez3), scale3,
               n_trans=n_trans})
 
-  let manual_from_f64 (m: manual_base f64): manual_base f32 =
+  def manual_from_f64 (m: manual_base f64): manual_base f32 =
     let c = f32.f64
     in {rotate0=(c m.rotate0.0, c m.rotate0.1, c m.rotate0.2),
         tfac0=(c m.tfac0.0, c m.tfac0.1, c m.tfac0.2),
