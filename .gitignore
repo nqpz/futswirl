@@ -3,5 +3,6 @@
 /*.o
 /*.h
 /futswirl_wrapper.fut
+/futswirl_wrapper.json
 /futswirl
 /settings.fut
