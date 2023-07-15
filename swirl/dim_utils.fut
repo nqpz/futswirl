@@ -94,7 +94,7 @@ module fractal_utils_extended (float: float_extended)
     in {n_trans=i32.i64 n_trans, n_points=n_points,
         n_iterations=iterations',
         rot_square_radius=rot_square_radius,
-        render=unflatten height width frame}
+        render=unflatten frame}
 
   -- Pretty conservative.
   def branch_visible (c: vec2.vector) (cur_scale: float) (vp_zoom: float)
