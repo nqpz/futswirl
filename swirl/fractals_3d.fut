@@ -29,6 +29,16 @@ module fractals (float: float_extended) = {
     (rotate (f 0, f 0, f (-0.4)) >-> translate (f 0.1, f 0.1, f 0) >-> scale (f 0.95))
     (scale (f 0.8) >-> translate (f 0.1, f 0, f 0))
 
+  def pyramid time =
+    let a = float.(f 2 * pi / f 3)
+    let at = f 0.1 float.* time
+    let (a0, a1, a2) = (at, at float.+ a, at float.+ a float.* (f 2))
+    in fractal4
+       (translate (f 0.5 float.* float.cos a0, f 0.5, f 0.5 float.* float.sin a0) >-> scale (f 0.5))
+       (translate (f 0.5 float.* float.cos a1, f 0.5, f 0.5 float.* float.sin a1) >-> scale (f 0.5))
+       (translate (f 0.5 float.* float.cos a2, f 0.5, f 0.5 float.* float.sin a2) >-> scale (f 0.5))
+       (translate (f 0, f (-0.5), f 0) >-> scale (f 0.5))
+
   def rotating_sierpinski time =
     fractal3
     (rotate (f 0, (float.neg (time float./ f 3)), f 0) >-> translate (f 0, f (-0.25), f 0) >-> scale (f 0.5))
@@ -40,6 +50,7 @@ module fractals (float: float_extended) = {
 
   type fractal = #manual
                | #swirl
+               | #pyramid
                | #rotating_sierpinski
                | #eof -- end of fractals
   def fractals_end (f: fractal): bool = f == #eof
@@ -51,12 +62,14 @@ module fractals (float: float_extended) = {
                                    -- good.
     case 1 -> #manual -- XXX: Generate better 3D fractals.
     case 2 -> #swirl
+    case 3 -> #pyramid
     case _ -> #eof
 
   def fractal_name (f: fractal): string [] =
     match f
     case #manual -> "random" -- more meaningful user-facing name than "manual"
     case #swirl -> "swirl"
+    case #pyramid -> "pyramid"
     case #rotating_sierpinski -> "rotating sierpinski"
     case #eof -> ""
 
@@ -90,6 +103,8 @@ module fractals (float: float_extended) = {
                  render_approach)
     case #swirl ->
       swirl time height width iterations vp_zoom vp_center render_approach
+    case #pyramid ->
+      pyramid time height width iterations vp_zoom vp_center render_approach
     case #rotating_sierpinski ->
       rotating_sierpinski time height width iterations vp_zoom vp_center render_approach
     case #eof -> {n_trans=0, n_points=0, n_iterations=0, rot_square_radius=float.f64 0,
