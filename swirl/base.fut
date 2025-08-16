@@ -5,7 +5,7 @@ import "../lib/github.com/diku-dk/lys/lys"
 import "settings"
 
 module rnge = xorshift128plus
-module f32dist = uniform_real_distribution f32 rnge
+module f32dist = uniform_real_distribution f32 u64 rnge
 type rng = rnge.rng
 
 type render_approach = #scalarloop | #cullbranches
@@ -29,10 +29,12 @@ module type float_extended = {
   val gen_float: rnge.rng -> (rng, t)
 }
 
+module normal_distribution_u64 (float: float) = normal_distribution float u64 rnge
+
 module mk_float_extended (float: float): float_extended with t = float.t = {
   open float
 
-  module norm_dist = normal_distribution float rnge
+  module norm_dist = normal_distribution_u64 float
 
   type render_result [h][w] = render_result_base [h][w] t
 
